@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Hello Glimmer</title>
+    <title>Glimmer Playground</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -17,7 +17,17 @@
     {{content-for "body"}}
 
     <div id="app"></div>
+    <script src="{{rootURL}}vs/loader.js"></script>
+    <script>
+      window.vsRequire = require;
+      window.vsDefine = define;
+      window.define = undefined;
+    </script>
+    <script src="{{rootURL}}types.js"></script>
     <script src="{{rootURL}}app.js"></script>
+    <script>
+      window.define = vsDefine;
+    </script>
 
     {{content-for "body-footer"}}
   </body>

@@ -1,3 +1,20 @@
 <div>
-  <h1>Welcome to Glimmer!</h1>
+  <h1>Glimmer Playground</h1>
+
+  {{#if isLoaded}}
+    <div class="editors">
+      {{#each components key="id" as |component|}}
+        <h2>Template</h2>
+        <code-editor @file={{component.template}} @onFileDidChange={{action fileDidChange}} />
+        <h2>Component</h2>
+        <code-editor @file={{component.component}} @onFileDidChange={{action fileDidChange}} />
+      {{/each}}
+
+      {{!--<button onclick={{action addComponent}}>New Component</button>--}}
+    </div>
+
+    <glimmer-vm-vm @revision={{revision}} @components={{components}} />
+  {{else}}
+    Loading Dependencies...
+  {{/if}}
 </div>

@@ -1,3 +1,16 @@
-h1 {
-  color: #444;
+.editors {
+  position: fixed;
+  top: 100px;
+  left: 0;
+  bottom: 0;
+  right: 50%;
+}
+
+.vm {
+  border: 1px solid red;
+  position: fixed;
+  left: 50%;
+  right: 0;
+  top: 100px;
+  bottom: 0;
 }
