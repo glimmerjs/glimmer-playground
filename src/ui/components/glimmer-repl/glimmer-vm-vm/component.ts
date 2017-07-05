@@ -1,8 +1,8 @@
 import Component, { tracked } from '@glimmer/component';
-import * as GlimmerComponent from '@glimmer/component';
 import Application from '@glimmer/application';
 import { precompile } from '@glimmer/compiler';
 import { ComponentManager } from '@glimmer/component';
+import { debounce } from 'decko';
 import Resolver, { BasicModuleRegistry } from '@glimmer/resolver';
 import resolverConfiguration from '../../../../../config/resolver-configuration';
 
@@ -13,41 +13,21 @@ interface ElementApp {
 export const apps: ElementApp[] = [];
 
 export default class GlimmerVMVM extends Component {
-  @tracked lastRevision = 0;
-
   didInsertElement() {
-    this.execute();
-  }
+    let fs = this.args.fs;
 
-  didUpdate() {
-    this.execute();
-  }
-
-  execute() {
-    let { lastRevision } = this;
-    if (this.args.revision === lastRevision) {
-      return;
-    }
-
-    this.lastRevision = this.args.revision;
-
-    let components = this.args.components;
-    let resolutionMap = {
+    fs.onChange = () => {
+      this.execute();
     };
-    let firstName = this.args.components[0].name;
 
-    for (let { name, component, template } of components) {
-      let klass = evalTypeScript(component.emit());
-      klass = klass && klass.default;
-      resolutionMap[`component:/glimmer-repl/components/${name}`] = klass;
-      let specifier = `template:/glimmer-repl/components/${name}`;
-      try {
-        resolutionMap[`template:/glimmer-repl/components/${name}`] = JSON.parse(precompile(template.sourceText, { meta: { specifier } }));
-      } catch (e) {
-        console.log('Handlebars parse error:', e);
-        return;
-      }
-    }
+    this.execute();
+  }
+
+  @debounce(200)
+  execute() {
+    let fs = this.args.fs;
+    let resolutionMap = fs.toResolutionMap();
+    console.log(resolutionMap);
 
     class App extends Application {
       vmElement: HTMLElement;
@@ -95,34 +75,11 @@ export default class GlimmerVMVM extends Component {
     if (apps.length > 0) {
       let oldApp = apps.pop();
       oldApp.vmElement.parentNode.removeChild(oldApp.vmElement);
-      console.log('old app', oldApp);
     }
 
     apps.push(app);
     this.element.insertBefore(app.vmElement, null);
-    app.renderComponent(firstName, app.vmElement, null);
+    app.renderComponent('my-glimmer-app', app.vmElement, null);
     app.boot();
-    console.log('BOOTED');
   }
-}
-
-let packages = {
-  '@glimmer/component': GlimmerComponent
-};
-
-function evalTypeScript(source: string) {
-  let tsExports;
-  console.log(source);
-
-  try {
-    let require = function(pkgName) {
-      return packages[pkgName];
-    };
-
-    tsExports = eval(`(function(exports) { ${source}; return exports; })({})`);
-  } catch (e) {
-    console.log(e);
-  }
-
-  return tsExports;
 }

@@ -26,7 +26,8 @@ module.exports = function(defaults) {
         resolve({ jsnext: true, module: true, main: true }),
         commonjs({
           namedExports: {
-            'node_modules/handlebars/lib/index.js': ['parse']
+            'node_modules/handlebars/lib/index.js': ['parse'],
+            'node_modules/decko/dist/decko.js': ['debounce', 'bind']
           }
         })
       ]

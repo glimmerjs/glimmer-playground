@@ -1,20 +1,39 @@
 <div>
-  <h1>Glimmer Playground</h1>
-
   {{#if isLoaded}}
-    <div class="editors">
+    <div class="pane editor">
+      <h1>Glimmer Playground</h1>
       {{#each components key="id" as |component|}}
-        <h2>Template</h2>
-        <code-editor @file={{component.template}} @onFileDidChange={{action fileDidChange}} />
-        <h2>Component</h2>
-        <code-editor @file={{component.component}} @onFileDidChange={{action fileDidChange}} />
+        <div class="component">
+          <h2>
+            <span class="bracket">&lt;</span>{{component.name}}<span class="bracket">&gt;</span>
+          </h2>
+          <div class="file template">
+            <h3>template.hbs</h3>
+            <code-editor @file={{component.template}} />
+          </div>
+
+          {{#if component.component}}
+            <div class="file implementation">
+              <h3>component.ts</h3>
+              <code-editor @file={{component.component}} />
+            </div>
+          {{else}}
+            <div class="file add-implementation">
+              <new-button @onClick={{action addComponentImplementation component}} @title="Add TypeScript" />
+            </div>
+          {{/if}}
+        </div>
       {{/each}}
 
-      {{!--<button onclick={{action addComponent}}>New Component</button>--}}
+      <new-button @onClick={{action createNewComponent}} @title="Create New Component" />
     </div>
 
-    <glimmer-vm-vm @revision={{revision}} @components={{components}} />
+    <div class="pane vm">
+      <glimmer-vm-vm @fs={{fs}} />
+    </div>
   {{else}}
-    Loading Dependencies...
+    <div class="loading">
+      <span>Loading Editor...</span>
+    </div>
   {{/if}}
 </div>
