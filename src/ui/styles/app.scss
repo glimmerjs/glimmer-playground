@@ -1,177 +1,19 @@
-$header-height: 0px;
+@import "./responsive";
+@import "./solarized";
+@import "./typography";
 
-/* Solarized */
-$base03:    #002b36;
-$base02:    #073642;
-$base01:    #586e75;
-$base00:    #657b83;
-$base0:     #839496;
-$base1:     #93a1a1;
-$base2:     #eee8d5;
-$base3:     #fdf6e3;
-$yellow:    #b58900;
-$orange:    #cb4b16;
-$red:       #dc322f;
-$magenta:   #d33682;
-$violet:    #6c71c4;
-$blue:      #268bd2;
-$cyan:      #2aa198;
-$green:     #859900;
-
-@mixin rebase($rebase03,$rebase02,$rebase01,$rebase00,$rebase0,$rebase1,$rebase2,$rebase3)
-{
-    background-color:$rebase03;
-    color:$rebase0;
-    * { color:$rebase0; }
-    h1,h2,h3,h4,h5,h6 { color:$rebase1; border-color: $rebase0; }
-    a, a:active, a:visited { color: $rebase1; }
-}
-
-@mixin accentize($accent) {
-    a, a:active, a:visited, code.url { color: $accent; }
-    h1,h2,h3,h4,h5,h6 {color:$accent}
-}
-
-@mixin solarized-dark  {
-  @include rebase($base03,$base02,$base01,$base00,$base0,$base1,$base2,$base3)
-}
-
-@mixin monospace {
-  font-family: CamingoCode, Fira, "Source Code Pro", Menlo, Consolas, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
-}
+@import "./components/glimmer-repl";
+@import "./components/code-editor";
+@import "./components/repl-button";
 
 * {
   box-sizing: border-box;
 }
 
 body, html {
+  @include system-font;
+
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-}
-
-.loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pane {
-  position: absolute;
-  top: $header-height;
-  right: 0;
-  bottom: 0;
-  left: 0;
-
-  overflow: scroll;
-}
-
-h1 {
-  margin: 32px 0 64px;
-  text-align: center;
-}
-
-.editor {
-  right: 50%;
-  border-right: 1px solid #ddd;
-  @include solarized-dark();
-}
-
-.monaco-editor.vs-dark.solarized-dark,
-.monaco-editor.vs-dark.solarized-dark .monaco-editor-background {
-  background-color: $base03;
-}
-
-.monaco-editor.vs-dark.solarized-dark .view-overlays .current-line {
-  border: none;
-  background-color: $base02;
-}
-
-.component h2 {
-  margin: 15px 17px 15px;
-  font-weight: normal;
-  font-size: 1.2rem;
-  color: $blue;
-  @include monospace;
-
-  > .bracket {
-    color: $base01;
-  }
-}
-
-.component h3 {
-  // @include monospace;
-  font-weight: normal;
-  font-size: 0.8rem;
-  margin: 15px 17px 15px 27px;
-}
-
-.file {
-  padding-left: 32px;
-}
-
-.file.add-implementation .new-button-2 {
-  margin-left: 27px; 
-}
-
-.vm {
-  left: 50%;
-}
-
-.new-button-2 {
-  margin: 8px 0;
-  padding: 0;
-  border: none;
-  padding-bottom: 2px;
-  color: $orange;
-  border-bottom: 2px solid $orange;
-  background-color: $base03;
-  // color: $base1;
-  font-size: 0.8rem;
-  cursor: pointer;
-}
-
-.new-button {
-  margin: 8px 0;
-  display: inline-block;
-  min-height: 18px;
-  padding: 8px 10px 8px 40px;
-  position: relative;
-  border: none;
-  border-radius: 5px;
-  border: 1px solid $blue;
-  background-color: $base03;
-  color: $base1;
-  text-align: center;
-  font-size: 1rem;
-  cursor: pointer;
-
-  &:hover {
-    color: $base2;
-
-    > .icon {
-      color: $base2;
-    }
-  }
-
-  > .icon {
-    position: absolute;
-    font-size: 1.5rem;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    line-height: 30px;
-    // align-items: center;
-    justify-content: center;
-    width: 30px;
-    display: flex;
-    border-right: 1px solid $blue;
-    color: $base1;
-  }
-}
-
-.editor > .new-button-2 {
-  margin-top: 32px;
-  margin-left: 5px;
 }

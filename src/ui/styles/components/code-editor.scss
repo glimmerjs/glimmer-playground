@@ -1,0 +1,11 @@
+.code-editor {
+  .monaco-editor.vs-dark.solarized-dark,
+  .monaco-editor.vs-dark.solarized-dark .monaco-editor-background {
+    background-color: $base03;
+  }
+
+  .monaco-editor.vs-dark.solarized-dark .view-overlays .current-line {
+    border: none;
+    background-color: $base02;
+  }
+}

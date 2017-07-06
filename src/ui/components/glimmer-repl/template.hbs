@@ -1,39 +1,39 @@
-<div>
+<glimmer-repl>
   {{#if isLoaded}}
     <div class="pane editor">
       <h1>Glimmer Playground</h1>
       {{#each components key="id" as |component|}}
         <div class="component">
-          <h2>
+          <h2 class="component-name">
             <span class="bracket">&lt;</span>{{component.name}}<span class="bracket">&gt;</span>
           </h2>
           <div class="file template">
-            <h3>template.hbs</h3>
+            <h3 class="file-name">template.hbs</h3>
             <code-editor @file={{component.template}} />
           </div>
 
           {{#if component.component}}
             <div class="file implementation">
-              <h3>component.ts</h3>
+              <h3 class="file-name">component.ts</h3>
               <code-editor @file={{component.component}} />
             </div>
           {{else}}
             <div class="file add-implementation">
-              <new-button @onClick={{action addComponentImplementation component}} @title="Add TypeScript" />
+              <repl-button @onClick={{action addComponentImplementation component}} @title="Add TypeScript" />
             </div>
           {{/if}}
         </div>
       {{/each}}
 
-      <new-button @onClick={{action createNewComponent}} @title="Create New Component" />
+      <repl-button @onClick={{action createNewComponent}} @title="Create New Component" />
     </div>
 
     <div class="pane vm">
-      <glimmer-vm-vm @fs={{fs}} />
+      <glimmer-sandbox @fs={{fs}} />
     </div>
   {{else}}
     <div class="loading">
       <span>Loading Editor...</span>
     </div>
   {{/if}}
-</div>
+</glimmer-repl>

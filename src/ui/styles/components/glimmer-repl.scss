@@ -1,0 +1,65 @@
+glimmer-repl {
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pane {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    overflow: scroll;
+
+    padding-bottom: 30px;
+  }
+
+  .vm {
+    left: 50%;
+    padding: 0 7px;
+  }
+
+  .editor {
+    right: 50%;
+    border-right: 1px solid #ddd;
+    @include solarized-dark;
+  }
+
+  .editor > [is="repl-button"] {
+    margin: 32px 0 0 5px;
+  }
+
+  .component-name {
+    margin: 15px 17px 15px;
+    font-weight: normal;
+    font-size: 1.2rem;
+    color: $blue;
+    @include monospace;
+
+    > .bracket {
+      color: $base01;
+    }
+  }
+
+  .file {
+    padding-left: 32px;
+  }
+
+  .file-name {
+    font-weight: normal;
+    font-size: 0.8rem;
+    margin: 15px 17px 15px 27px;
+  }
+
+  .add-implementation [is="repl-button"] {
+    margin-left: 27px; 
+  }
+
+  h1 {
+    margin: 32px 0 64px;
+    text-align: center;
+  }
+}
