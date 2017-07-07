@@ -91,12 +91,13 @@ export default class GlimmerRepl extends Component {
     let { searchParams } = new URL(document.location.toString());
     let app = searchParams.get('app');
 
-    return app ? JSON.parse(app) : DEFAULT_APP;
+    return app ? JSON.parse(decodeURIComponent(atob(app))) : DEFAULT_APP;
   }
 
   serialize() {
     let serialized = JSON.stringify(this.components);
-    history.replaceState(null, null, `?app=${encodeURIComponent(serialized)}`);
+    let encoded = btoa(encodeURIComponent(serialized));
+    history.replaceState(null, null, `?app=${encoded}`);
   }
 
   nameForNewComponent() {
