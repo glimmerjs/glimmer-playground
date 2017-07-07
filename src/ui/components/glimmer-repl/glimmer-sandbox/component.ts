@@ -34,7 +34,6 @@ export default class GlimmerSandbox extends Component {
 
     try {
       resolutionMap = fs.toResolutionMap();
-      console.log(resolutionMap);
     } catch (e) {
       this.lastError = e.toString();
       return;
