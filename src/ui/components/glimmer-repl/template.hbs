@@ -32,8 +32,12 @@
       <glimmer-sandbox @fs={{fs}} />
     </div>
   {{else}}
-    <div class="loading">
-      <span>Loading Editor...</span>
+    <div class="pane editor">
+      <div class="loading">
+        <span>Loading the Playground...</span>
+      </div>
+    </div>
+    <div class="pane vm">
     </div>
   {{/if}}
 </glimmer-repl>
