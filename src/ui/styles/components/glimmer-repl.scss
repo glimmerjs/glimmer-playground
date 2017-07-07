@@ -23,12 +23,22 @@ glimmer-repl {
   }
 
   .vm {
-    left: 50%;
-    padding: 0 7px;
+    @include desktop {
+      left: 50%;
+    }
+
+    @include mobile {
+      min-height: 100vh;
+    }
+
+    padding: 32px 7px 32px;
   }
 
   .editor {
-    right: 50%;
+    @include desktop {
+      right: 50%;
+    }
+
     border-right: 1px solid #ddd;
     @include solarized-dark;
   }
