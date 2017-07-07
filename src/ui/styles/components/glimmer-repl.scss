@@ -19,7 +19,7 @@ glimmer-repl {
       overflow: scroll;
     }
 
-    padding-bottom: 30px;
+    padding: 32px 0;
   }
 
   .vm {
@@ -31,7 +31,7 @@ glimmer-repl {
       min-height: 100vh;
     }
 
-    padding: 32px 7px 32px;
+    padding: 32px;
   }
 
   .editor {
@@ -81,7 +81,6 @@ glimmer-repl {
   }
 
   .title {
-    margin: 32px 0 64px;
     text-align: center;
   }
 }
