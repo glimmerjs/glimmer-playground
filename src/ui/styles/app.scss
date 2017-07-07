@@ -5,6 +5,8 @@
 @import "./components/glimmer-repl";
 @import "./components/code-editor";
 @import "./components/repl-button";
+@import "./components/editable-title";
+@import "./components/glimmer-sandbox";
 
 * {
   box-sizing: border-box;

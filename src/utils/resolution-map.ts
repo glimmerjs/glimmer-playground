@@ -2,6 +2,7 @@ import { File } from './file-system';
 import * as GlimmerComponent from '@glimmer/component';
 import compileTypeScript from './compilers/compile-typescript';
 import compileTemplate from './compilers/compile-template';
+import { specifierForTemplate, specifierForComponent } from "./specifiers";
 
 export default class ResolutionMap {
   files: File[];
@@ -42,33 +43,11 @@ let packages = {
 };
 
 function evalTypeScript(source: string) {
-  let tsExports;
+  let require = function(pkgName) {
+    return packages[pkgName];
+  };
 
-  try {
-    let require = function(pkgName) {
-      return packages[pkgName];
-    };
-
-    tsExports = eval(`(function(exports) { ${source}; return exports; })({})`);
-  } catch (e) {
-    console.log(e);
-  }
+  let tsExports = eval(`(function(exports) { ${source}; return exports; })({})`);
 
   return tsExports;
-}
-
-function specifierForTemplate(fileName: string) {
-  let segments = fileName.split('/')
-  let name = basename(segments[segments.length-1]);
-  return `template:/glimmer-repl/components/${name}`;
-}
-
-function specifierForComponent(fileName: string) {
-  let segments = fileName.split('/')
-  let name = basename(segments[segments.length-1])
-  return `component:/glimmer-repl/components/${name}`;
-}
-
-function basename(fileName: string) {
-  return fileName.substring(0, fileName.lastIndexOf('.'));
 }

@@ -22,52 +22,55 @@ export default class extends Component {
 
 export default class FileSystem {
   files: File[] = [];
+  listeners = [];
 
-  createTemplateFile(fileName: string) {
-    return this.createFile(fileName, 'handlebars', DEFAULT_TEMPLATE);
-  }
-
-  createComponentFile(fileName: string) {
-    return this.createFile(fileName, 'typescript', DEFAULT_COMPONENT);
-  }
-
-  createFile(fileName: string, language: string, sourceText) {
-    let file = new File(this, fileName, language, sourceText);
+  createFile(fileName: string, sourceText) {
+    let file = new File(this, fileName, sourceText);
     this.files.push(file);
     this.didChange();
     return file;
   }
 
+  createFileFromJSON({ fileName, sourceText }) {
+    return this.createFile(fileName, sourceText);
+  }
+
   toResolutionMap() {
-    try {
-      return new ResolutionMap(this.files).toJSON();
-    } catch (e) {
-      console.log("Error while compiling program", e);
-      return {};
-    }
+    return new ResolutionMap(this.files).toJSON();
   }
 
   didChange() {
-    this.onChange();
+    this.listeners.forEach(cb => cb());
   }
 
-  onChange = () => {};
+  onChange(cb: () => void) {
+    this.listeners.push(cb);
+  }
 }
 
 export class File {
   fs: FileSystem;
   fileName: string;
-  language: string;
   sourceText: string;
 
-  constructor(fs: FileSystem, fileName: string, language: string, sourceText = '') {
+  constructor(fs: FileSystem, fileName: string, sourceText = '') {
     this.fs = fs;
     this.fileName = fileName;
-    this.language = language;
     this.sourceText = sourceText;
+  }
+
+  get language() {
+    let { fileName } = this;
+    let ext = fileName.substr(fileName.lastIndexOf('.'));
+    return ext === '.ts' ? 'typescript' : 'handlebars';
   }
 
   didChange() {
     this.fs.didChange();
+  }
+
+  toJSON() {
+    let { fileName, sourceText } = this;
+    return { fileName, sourceText };
   }
 }

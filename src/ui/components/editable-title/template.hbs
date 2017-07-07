@@ -1,0 +1,8 @@
+<editable-title onclick={{action startEditing}}>
+  {{~#if isEditing ~}}
+    <input style="{{inputStyle}}" type=text value={{value}}>
+  {{~else~}}
+    <span>{{~value~}}</span>
+   {{~/if~}}
+</editable-title>
+{{~! Consume any extra whitespace ~}}

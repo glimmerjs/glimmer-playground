@@ -16,6 +16,18 @@ class ComponentFiles {
     this.id = _id++;
     Object.assign(this, options);
   }
+
+  toJSON() {
+    let { name, template, component } = this;
+    return { name, template, component };
+  }
+
+  static fromJSON(fs: FileSystem, files) {
+    let { template, component } = files;
+    files.template = fs.createFileFromJSON(template);
+    files.component = component ? fs.createFileFromJSON(component) : null;
+    return new ComponentFiles(files)
+  }
 }
 
 const NEW_COMPONENT_NAMES = [
@@ -27,9 +39,30 @@ const NEW_COMPONENT_NAMES = [
   'calm-down-with-the-components'
 ];
 
+const DEFAULT_APP = [{
+  name: 'my-glimmer-app',
+  template: {
+    fileName: pathForTemplate('my-glimmer-app'),
+    sourceText: `<div>
+  <h1>Welcome to Glimmer!</h1>
+  <p>You have clicked the button {{count}} times.</p>
+  <button onclick={{action increment}}>Click</button>
+</div>`
+  },
+  component: {
+    fileName: pathForComponent('my-glimmer-app'),
+    sourceText: `import Component, { tracked } from '@glimmer/component';
+export default class extends Component {
+  @tracked count = 1;
+  increment() {
+    this.count++;
+  }
+}`
+  }
+}];
+
 export default class GlimmerRepl extends Component {
   @tracked components: ComponentFiles[] = [];
-  @tracked revision = 1;
   @tracked isLoaded = false;
 
   fs = new FileSystem();
@@ -38,9 +71,32 @@ export default class GlimmerRepl extends Component {
     waitForDependencies()
       .then(() => {
         this.isLoaded = true;
-        this.createNewComponent();
-        this.addComponentImplementation(this.components[0]);
+        this.init();
       });
+  }
+
+  init() {
+    let { fs } = this;
+
+    let components = this.initComponents();
+    this.components = components
+      .map(json => ComponentFiles.fromJSON(fs, json));
+
+    fs.onChange(() => {
+      this.serialize();
+    });
+  }
+
+  initComponents() {
+    let { searchParams } = new URL(document.location.toString());
+    let app = searchParams.get('app');
+
+    return app ? JSON.parse(app) : DEFAULT_APP;
+  }
+
+  serialize() {
+    let serialized = JSON.stringify(this.components);
+    history.replaceState(null, null, `?app=${encodeURIComponent(serialized)}`);
   }
 
   nameForNewComponent() {
@@ -54,8 +110,8 @@ export default class GlimmerRepl extends Component {
 
   createNewComponent() {
     let name = this.nameForNewComponent();
-    let templatePath = `src/ui/components/${name}.hbs`;
-    let template = this.fs.createTemplateFile(templatePath);
+    let templatePath = pathForTemplate(name);
+    let template = this.fs.createFile(templatePath, `<${name}>\n</${name}>`);
 
     let files = new ComponentFiles({
       name,
@@ -64,14 +120,40 @@ export default class GlimmerRepl extends Component {
     });
 
     this.components = [...this.components, files];
+    this.serialize();
   }
 
   addComponentImplementation(files: ComponentFiles) {
     let { name } = files;
-    let componentPath = `src/ui/components/${name}.ts`;
-    let component = this.fs.createComponentFile(componentPath);
+    let componentPath = pathForComponent(name);
+    let component = this.fs.createFile(componentPath, `import Component, { tracked } from "@glimmer/component";
+    
+export default class extends Component {
+  @tracked magicNumber = 42;
+});`);
     files.component = component;
+    this.serialize();
   }
+
+  componentNameDidChange(files: ComponentFiles, name: string) {
+    let { component, template } = files;
+
+    template.fileName = pathForTemplate(name);
+    if (component) {
+      component.fileName = pathForComponent(name);
+    }
+
+    files.name = name;
+    this.fs.didChange();
+  }
+}
+
+function pathForTemplate(name) {
+  return `src/ui/components/${name}/template.hbs`;
+}
+
+function pathForComponent(name) {
+  return `src/ui/components/${name}/component.ts`;
 }
 
 function waitForDependencies() {
@@ -94,7 +176,7 @@ function initializeTypeScript() {
   }
 
   ts.typescriptDefaults.setCompilerOptions({
-    target: ts.ScriptTarget.ES2016,
+    target: ts.ScriptTarget.ES2015,
     moduleResolution: ts.ModuleResolutionKind.NodeJs,
     module: ts.ModuleKind.ES2015,
     experimentalDecorators: true,

@@ -1,0 +1,13 @@
+editable-title {
+  > span, > input {
+    display: inline-block;
+    padding: 2px;
+    margin: 0;
+  }
+
+  > input {
+    border: 0;
+    background-color: $base02;
+    outline: none;
+  }
+}

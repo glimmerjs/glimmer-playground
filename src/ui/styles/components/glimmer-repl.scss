@@ -34,6 +34,7 @@ glimmer-repl {
 
   .component-name {
     margin: 15px 17px 15px;
+    padding: 4px 0;
     font-weight: normal;
     font-size: 1.2rem;
     color: $blue;
@@ -58,7 +59,7 @@ glimmer-repl {
     margin-left: 27px; 
   }
 
-  h1 {
+  .title {
     margin: 32px 0 64px;
     text-align: center;
   }

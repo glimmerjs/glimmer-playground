@@ -17,7 +17,7 @@ export default class CodeEditor extends Component {
     let editor = this.editor = monaco.editor.create(this.element as HTMLElement, {
       scrollBeyondLastLine: false,
       theme: 'solarized-dark',
-      model,
+      model
     });
 
     this.autoResize();

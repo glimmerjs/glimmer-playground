@@ -12,13 +12,15 @@ interface ElementApp {
 
 export const apps: ElementApp[] = [];
 
-export default class GlimmerVMVM extends Component {
+export default class GlimmerSandbox extends Component {
+  @tracked lastError: string = null;
+
   didInsertElement() {
     let fs = this.args.fs;
 
-    fs.onChange = () => {
+    fs.onChange(() => {
       this.execute();
-    };
+    });
 
     this.execute();
   }
@@ -26,8 +28,18 @@ export default class GlimmerVMVM extends Component {
   @debounce(200)
   execute() {
     let fs = this.args.fs;
-    let resolutionMap = fs.toResolutionMap();
-    console.log(resolutionMap);
+    let resolutionMap;
+
+    this.lastError = null;
+
+    try {
+      resolutionMap = fs.toResolutionMap();
+      console.log(resolutionMap);
+    } catch (e) {
+      this.lastError = e.toString();
+      return;
+    }
+    let component = this;
 
     class App extends Application {
       vmElement: HTMLElement;
@@ -53,12 +65,12 @@ export default class GlimmerVMVM extends Component {
             try {
               oldRerender.apply(this);
             } catch (e) {
-              console.log('ERROR IN RERENDER', e);
+              component.lastError = e.toString();
               if (this.env['_transaction']) { this.env['_transaction'] = null; }
             }
           };
         } catch (e) {
-          console.log('ERROR IN RENDER', e);
+          component.lastError = e.toString();
           if (this.env['_transaction']) { this.env['_transaction'] = null; }
         }
 
