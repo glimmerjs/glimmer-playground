@@ -9,6 +9,8 @@ const concat = require('broccoli-concat');
 const { map } = require('broccoli-stew');
 
 module.exports = function(defaults) {
+  const isProduction = process.env.EMBER_ENV === 'production';
+
   function handlebars() {
     return {
       resolveId(id) {
@@ -34,7 +36,8 @@ module.exports = function(defaults) {
     }
   });
 
-  let monaco = new Funnel('node_modules/monaco-editor/dev/vs', {
+  let monacoMode = isProduction ? 'min' : 'dev';
+  let monaco = new Funnel(`node_modules/monaco-editor/${monacoMode}/vs`, {
     destDir: 'vs'
   });
 
