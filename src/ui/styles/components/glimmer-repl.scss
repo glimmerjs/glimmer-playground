@@ -37,7 +37,7 @@ glimmer-repl {
     margin: 32px 0 0 5px;
   }
 
-  .component-name {
+  h2.component-name {
     margin: 15px 17px 15px;
     padding: 4px 0;
     font-weight: normal;
@@ -46,7 +46,11 @@ glimmer-repl {
     @include monospace;
 
     > .bracket {
-      color: $base01;
+      color: $base0;
+    }
+
+    button.remove {
+      margin-left: -9px;
     }
   }
 

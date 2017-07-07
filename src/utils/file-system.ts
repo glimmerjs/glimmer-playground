@@ -73,4 +73,10 @@ export class File {
     let { fileName, sourceText } = this;
     return { fileName, sourceText };
   }
+
+  remove() {
+    let { files } = this.fs;
+    files.splice(files.indexOf(this), 1);
+    this.didChange();
+  }
 }

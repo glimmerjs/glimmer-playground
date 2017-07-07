@@ -1,6 +1,7 @@
 import Component, { tracked } from "@glimmer/component";
 import FileSystem, { File } from "../../../utils/file-system";
 import SolarizedTheme from "../../../utils/monaco/themes/solarized-dark";
+import { debounce } from "decko";
 
 declare function vsRequire(deps: string[], cb: any);
 declare var typings;
@@ -8,6 +9,8 @@ declare var typings;
 let _id = 1;
 class ComponentFiles {
   id: number;
+  isEditable = true;
+
   @tracked name: string;
   @tracked template: File;
   @tracked component: File;
@@ -66,6 +69,7 @@ export default class GlimmerRepl extends Component {
   @tracked isLoaded = false;
 
   fs = new FileSystem();
+  lastUnknownComponent = null;
 
   didInsertElement() {
     waitForDependencies()
@@ -81,6 +85,7 @@ export default class GlimmerRepl extends Component {
     let components = this.initComponents();
     this.components = components
       .map(json => ComponentFiles.fromJSON(fs, json));
+    this.components[0].isEditable = false;
 
     fs.onChange(() => {
       this.serialize();
@@ -94,6 +99,7 @@ export default class GlimmerRepl extends Component {
     return app ? JSON.parse(decodeURIComponent(atob(app))) : DEFAULT_APP;
   }
 
+  @debounce(200)
   serialize() {
     let serialized = JSON.stringify(this.components);
     let encoded = btoa(encodeURIComponent(serialized));
@@ -101,12 +107,22 @@ export default class GlimmerRepl extends Component {
   }
 
   nameForNewComponent() {
+    let name = this.lastUnknownComponent;
+    if (name) {
+      this.lastUnknownComponent = null;
+      return name;
+    }
+
     let count = this.components.length;
-    let name = NEW_COMPONENT_NAMES[count];
+    name = NEW_COMPONENT_NAMES[count];
 
     if (name) { return name; }
 
     return `my-component-${count+1}`;
+  }
+
+  saveUnknownComponent(componentName: string) {
+    this.lastUnknownComponent = componentName;
   }
 
   createNewComponent() {
@@ -128,12 +144,18 @@ export default class GlimmerRepl extends Component {
     let { name } = files;
     let componentPath = pathForComponent(name);
     let component = this.fs.createFile(componentPath, `import Component, { tracked } from "@glimmer/component";
-    
+
 export default class extends Component {
   @tracked magicNumber = 42;
-});`);
+};`);
     files.component = component;
     this.serialize();
+  }
+
+  removeComponentImplementation(files: ComponentFiles) {
+    files.component.remove();
+    files.component = null;
+    this.components = this.components;
   }
 
   componentNameDidChange(files: ComponentFiles, name: string) {
@@ -146,6 +168,13 @@ export default class extends Component {
 
     files.name = name;
     this.fs.didChange();
+  }
+
+  removeComponent(files: ComponentFiles) {
+    files.template.remove();
+    if (files.component) { files.component.remove(); }
+
+    this.components = this.components.filter(c => c !== files);
   }
 }
 

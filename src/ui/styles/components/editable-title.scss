@@ -3,6 +3,11 @@ editable-title {
     display: inline-block;
     padding: 2px;
     margin: 0;
+    color: $blue;
+  }
+
+  &:hover > span {
+    background-color: $base01;
   }
 
   > input {

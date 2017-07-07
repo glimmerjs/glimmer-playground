@@ -55,12 +55,16 @@ function modelFor(file: File) {
   let { sourceText, language, fileName } = file;
   let uri = monaco.Uri.parse(`file:///${fileName}`);
 
-  let model = monaco.editor.createModel(sourceText, language, uri);
+  let model = monaco.editor.getModel(uri);
+  
+  if (!model) {
+    model = monaco.editor.createModel(sourceText, language, uri);
 
-  model.updateOptions({
-    tabSize: 2,
-    insertSpaces: true
-  });
+    model.updateOptions({
+      tabSize: 2,
+      insertSpaces: true
+    });
+  }
 
   return model;
 }

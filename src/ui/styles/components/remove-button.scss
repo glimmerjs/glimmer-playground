@@ -1,0 +1,15 @@
+button.remove {
+  display: inline-block;
+  border: none;
+  background-color: transparent;
+  padding: 0 4px;
+  margin: 0;
+
+  font-size: inherit;
+  color: $base00;
+
+  &:hover {
+    color: $red;
+    cursor: pointer;
+  }
+}

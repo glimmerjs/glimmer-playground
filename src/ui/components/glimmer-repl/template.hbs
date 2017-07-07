@@ -5,16 +5,27 @@
       {{#each components key="id" as |component|}}
         <div class="component">
           <h2 class="component-name">
-            <span class="bracket">&lt;</span><editable-title @value={{component.name}} @onChange={{action componentNameDidChange component}} /><span class="bracket">&gt;</span>
+              <span class="bracket">&lt;</span>
+              {{~#if component.isEditable~}}
+                <editable-title @value={{component.name}} @onChange={{action componentNameDidChange component}} />
+              {{~else~}}
+                {{component.name}}
+              {{~/if~}}
+              <span class="bracket">&gt;</span>
+              {{#if component.isEditable}}
+                <remove-button @onClick={{action removeComponent component}} />
+              {{/if}}
           </h2>
           <div class="file template">
             <h3 class="file-name">template.hbs</h3>
             <code-editor @file={{component.template}} />
           </div>
-
           {{#if component.component}}
             <div class="file implementation">
-              <h3 class="file-name">component.ts</h3>
+              <h3 class="file-name">
+                component.ts
+                <remove-button @onClick={{action removeComponentImplementation component}} />
+              </h3>
               <code-editor @file={{component.component}} />
             </div>
           {{else}}
@@ -29,7 +40,7 @@
     </div>
 
     <div class="pane vm">
-      <glimmer-sandbox @fs={{fs}} />
+      <glimmer-sandbox @fs={{fs}} @onUnknownComponent={{action saveUnknownComponent}} />
     </div>
   {{else}}
     <div class="pane editor">

@@ -25,7 +25,7 @@ export default class GlimmerSandbox extends Component {
     this.execute();
   }
 
-  @debounce(200)
+  @debounce(600)
   execute() {
     let fs = this.args.fs;
     let resolutionMap;
@@ -56,23 +56,34 @@ export default class GlimmerSandbox extends Component {
       }
 
       render(): void {
-        if (this.env['_transaction']) { return; }
         try {
           super.render();
-          let oldRerender = this['_rerender'];
+          let _rerender = this['_rerender'];
+
           this['_rerender'] = () => {
             try {
-              oldRerender.apply(this);
+              _rerender.apply(this);
             } catch (e) {
-              if (this.env['_transaction']) { this.env['_transaction'] = null; }
-              component.lastError = e.toString();
+              this.reportError(e);
             }
           };
         } catch (e) {
-          component.lastError = e.toString();
-          if (this.env['_transaction']) { this.env['_transaction'] = null; }
+          this.reportError(e);
         }
+      }
 
+      reportError(e: Error) {
+        console.error(e);
+
+        if (this.env['_transaction']) { this.env['_transaction'] = null; }
+        this['_rerender'] = () => { };
+
+        component.lastError = e.toString();
+
+        let matches = e.message && e.message.match(/Could not find template for (\S+)/);
+        if (matches) {
+          component.args.onUnknownComponent(matches[1]);
+        }
       }
     }
 
@@ -85,7 +96,7 @@ export default class GlimmerSandbox extends Component {
 
     if (apps.length > 0) {
       let oldApp = apps.pop();
-      oldApp.vmElement.parentNode.removeChild(oldApp.vmElement);
+      oldApp.vmElement.remove();
     }
 
     apps.push(app);
