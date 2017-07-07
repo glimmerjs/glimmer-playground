@@ -52,32 +52,5 @@ module.exports = function(defaults) {
     outputFile: 'types.js'
   });
 
-  // monaco = new Concat(monaco, {
-  //   outputFile: 'monaco-editor.js'
-  // });
-
-  // let css = new Funnel('node_modules/codemirror', {
-  //   include: ['lib/codemirror.css', 'theme/solarized.css']
-  // });
-
-  // css = new Concat(css, {
-  //   outputFile: 'code-editor.css'
-  // });
-
   return mergeTrees([app.toTree(), monaco, libs]);
-
-  // Use `app.import` to add additional libraries to the generated
-  // output files.
-  //
-  // If you need to use different assets in different
-  // environments, specify an object as the first parameter. That
-  // object's keys should be the environment name and the values
-  // should be the asset to use in that environment.
-  //
-  // If the library that you are including contains AMD or ES6
-  // modules that you would like to import into your application
-  // please specify an object with the list of modules as keys
-  // along with the exports of each module as its value.
-
-  // return app.toTree();
 };

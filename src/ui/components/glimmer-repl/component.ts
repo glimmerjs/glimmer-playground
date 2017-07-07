@@ -170,13 +170,8 @@ function initializeTypeScript() {
 
   let ts = monaco.languages.typescript;
 
-  for (let filename in typings) {
-    let content = typings[filename];
-    ts.typescriptDefaults.addExtraLib(content, `file:///${filename}`);
-  }
-
   ts.typescriptDefaults.setCompilerOptions({
-    target: ts.ScriptTarget.ES2015,
+    target: ts.ScriptTarget.ES2017,
     moduleResolution: ts.ModuleResolutionKind.NodeJs,
     module: ts.ModuleKind.ES2015,
     experimentalDecorators: true,
@@ -184,4 +179,9 @@ function initializeTypeScript() {
     traceResolution: true,
     noEmit: true
   });
+
+  for (let filename in typings) {
+    let content = typings[filename];
+    ts.typescriptDefaults.addExtraLib(content, `file:///${filename}`);
+  }
 }

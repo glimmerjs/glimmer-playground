@@ -32,7 +32,7 @@
     "decko": "^1.2.0",
     "handlebars": "4",
     "lodash.debounce": "^4.0.8",
-    "monaco-editor": "^0.8.3",
+    "monaco-editor": "^0.9.0",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-node-resolve": "^3.0.0"
   }
