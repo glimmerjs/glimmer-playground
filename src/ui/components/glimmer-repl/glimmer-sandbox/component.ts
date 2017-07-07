@@ -65,8 +65,8 @@ export default class GlimmerSandbox extends Component {
             try {
               oldRerender.apply(this);
             } catch (e) {
-              component.lastError = e.toString();
               if (this.env['_transaction']) { this.env['_transaction'] = null; }
+              component.lastError = e.toString();
             }
           };
         } catch (e) {
