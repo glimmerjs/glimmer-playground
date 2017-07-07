@@ -96,13 +96,22 @@ const SolarizedTheme: monaco.editor.IStandaloneThemeData = {
 		foreground: blue
 	}, {
 		token: 'variable.parameter.handlebars',
-		foreground: blue
+		foreground: base2
 	}, {
 		token: 'identifier',
 		foreground: blue
 	}, {
 		token: 'attribute.name',
 		foreground: base0
+	}, {
+		token: 'attribute.value',
+		foreground: cyan
+	}, {
+		token: 'delimiter.html',
+		foreground: base01
+	}, {
+		token: 'tag',
+		foreground: blue
 	}]
 }
 
