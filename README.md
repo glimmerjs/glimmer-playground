@@ -1,7 +1,6 @@
 # glimmer-repl
 
-This README outlines the details of collaborating on this Glimmer application.
-A short introduction of this app could easily go here.
+See it live at https://glimmer-playground.netlify.com
 
 ## Prerequisites
 
