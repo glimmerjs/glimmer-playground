@@ -14,27 +14,41 @@ glimmer-visualizer {
   font-family: Menlo, Courier, monospace;
   box-shadow: rgba(black, 0.4) 0 0 35px;
 
-  .op .opcode {
-    color: $base1;
-  }
+  .decompiled {
+    .op .opcode {
+      color: $cyan;
+    }
 
-  .op .name {
-    color: $cyan;
-  }
+    .op .name {
+      color: $base2;
+    }
 
-  .operands {
-    padding-left: 17px;
-  }
+    .operands {
+      padding-left: 17px;
+    }
 
-  .operand .name {
-    color: $green;
-  }
+    .operand .name {
+      color: $green;
+    }
 
-  .operand .raw-value {
-    color: $base1;
-  }
+    .operand .raw-value {
+      color: $base1;
+    }
 
-  .operand.str .value {
-    color: $blue;
+    .operand .value {
+      color: $blue;
+    }
+  }
+  
+  .bytecode {
+    margin-top: 17px;
+
+    .opcode {
+      color: $cyan;
+    }
+
+    .operand {
+      color: $green;
+    }
   }
 }

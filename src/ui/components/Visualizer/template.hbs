@@ -1,4 +1,5 @@
 <glimmer-visualizer>
+  <div class="decompiled">
   {{#each opcodes key="@index" as |op|}}
     <div class="op">
       <span class="opcode">{{hex op.opcode}}</span>
@@ -12,11 +13,11 @@
                  {{operand.name}}:
                </span>
               {{/if}}
+              <span class="raw-value">
+                {{hex operand.rawValue}}
+              </span>
               <span class="value">
                 {{operand.value}}
-              </span>
-              <span class="raw-value">
-                ({{hex operand.rawValue}})
               </span>
             </div>
           {{/each}}
@@ -24,4 +25,13 @@
       {{/if}}
     </div>
   {{/each}}
+  </div>
+  <div class="bytecode">
+    {{#each opcodes key="@index" as |op|}}
+      <span class="opcode">{{hex op.opcode}}</span>
+      {{#each op.operands key="@index" as |operand|}}
+        <span class="operand">{{hex operand.rawValue}}</span>
+      {{/each}}
+    {{/each}}
+  </div>
 </glimmer-visualizer>
