@@ -1,3 +1,22 @@
 <glimmer-visualizer>
-  <pre>{{output}}</pre>
+  {{#each opcodes key="@index" as |op|}}
+    <div class="op">
+      <span class="opcode">{{hex op.opcode}}</span>
+      <span class="name">{{op.name}}</span>
+      {{#if op.operands}}
+        <div class="operands">
+          {{#each op.operands key="@index" as |operand|}}
+            <span class="operand {{operand.type}}">
+              <span class="value">
+                {{operand.value}}
+              </span>
+              <span class="raw-value">
+                ({{hex operand.rawValue}})
+              </span>
+            </span>
+          {{/each}}
+        </div>
+      {{/if}}
+    </div>
+  {{/each}}
 </glimmer-visualizer>

@@ -6,13 +6,31 @@ glimmer-visualizer {
   bottom: 10%;
   left: 10%;
 
-  padding: 5px;
-  overflow-y: scroll;
+  padding: 17px;
+  overflow-y: auto;
 
-  background: #000;
-  color: greenyellow;
+  color: $base3;
+  background: $base03;
+  font-family: Menlo, Courier, monospace;
+  box-shadow: rgba(black, 0.4) 0 0 35px;
 
-  pre {
-    white-space: pre-wrap;
+  .op .opcode {
+    color: $base1;
+  }
+
+  .op .name {
+    color: $cyan;
+  }
+
+  .operands {
+    padding-left: 17px;
+  }
+
+  .operand .raw-value {
+    color: $base1;
+  }
+
+  .operand.str .value {
+    color: $blue;
   }
 }
