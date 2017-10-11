@@ -34,23 +34,21 @@ class ComponentFiles {
 }
 
 const NEW_COMPONENT_NAMES = [
-  'my-glimmer-app',
-  'my-second-component',
-  'my-third-component',
-  'my-fourth-component',
-  'my-fifth-component',
-  'calm-down-with-the-components'
+  'GlimmerApp',
+  'SecondComponent',
+  'ThirdComponent',
+  'FourthComponent',
+  'FifthComponent',
+  'CalmDownWithTheComponents'
 ];
 
 const DEFAULT_APP = [{
-  name: 'my-glimmer-app',
+  name: 'GlimmerApp',
   template: {
     fileName: pathForTemplate('my-glimmer-app'),
-    sourceText: `<div>
-  <h1>Welcome to Glimmer!</h1>
-  <p>You have clicked the button {{count}} times.</p>
-  <button onclick={{action increment}}>Click</button>
-</div>`
+    sourceText: `<h1>Welcome to Glimmer!</h1>
+<p>You have clicked the button {{count}} times.</p>
+<button onclick={{action increment}}>Click</button>`
   },
   component: {
     fileName: pathForComponent('my-glimmer-app'),
@@ -118,7 +116,7 @@ export default class GlimmerRepl extends Component {
 
     if (name) { return name; }
 
-    return `my-component-${count+1}`;
+    return `Component${count+1}`;
   }
 
   saveUnknownComponent(componentName: string) {
@@ -128,7 +126,7 @@ export default class GlimmerRepl extends Component {
   createNewComponent() {
     let name = this.nameForNewComponent();
     let templatePath = pathForTemplate(name);
-    let template = this.fs.createFile(templatePath, `<${name}>\n</${name}>`);
+    let template = this.fs.createFile(templatePath, `<div>\n</div>`);
 
     let files = new ComponentFiles({
       name,

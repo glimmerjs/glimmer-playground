@@ -5,8 +5,11 @@ const ESCAPE_KEY = 27;
 
 export default class extends Component {
   _value: string;
-  element: HTMLElement;
   inputStyle: string;
+
+  get element(): HTMLElement {
+    return this.bounds.firstNode as HTMLElement;
+  }
 
   didInsertElement() {
     let style = window.getComputedStyle(this.element);

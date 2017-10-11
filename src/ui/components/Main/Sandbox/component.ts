@@ -6,7 +6,7 @@ import { debounce } from 'decko';
 import Resolver, { BasicModuleRegistry } from '@glimmer/resolver';
 import resolverConfiguration from '../../../../../config/resolver-configuration';
 
-interface ElementApp {
+interface ElementApp extends Application {
   vmElement: HTMLElement;
 }
 
@@ -14,6 +14,10 @@ export const apps: ElementApp[] = [];
 
 export default class GlimmerSandbox extends Component {
   @tracked lastError: string = null;
+
+  get element(): HTMLElement {
+    return this.bounds.firstNode as HTMLElement;
+  }
 
   didInsertElement() {
     let fs = this.args.fs;
@@ -55,9 +59,9 @@ export default class GlimmerSandbox extends Component {
         this.vmElement = document.createElement('div');
       }
 
-      render(): void {
+      _render(): void {
         try {
-          super.render();
+          super._render();
           let _rerender = this['_rerender'];
 
           this['_rerender'] = () => {
