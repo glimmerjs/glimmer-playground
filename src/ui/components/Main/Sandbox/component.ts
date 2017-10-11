@@ -105,7 +105,7 @@ export default class GlimmerSandbox extends Component {
 
     apps.push(app);
     this.element.insertBefore(app.vmElement, null);
-    app.renderComponent('my-glimmer-app', app.vmElement, null);
+    app.renderComponent('GlimmerApp', app.vmElement, null);
     app.boot();
   }
 }
