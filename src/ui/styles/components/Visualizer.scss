@@ -1,0 +1,18 @@
+glimmer-visualizer {
+  position: fixed;
+
+  top: 10%;
+  right: 10%;
+  bottom: 10%;
+  left: 10%;
+
+  padding: 5px;
+  overflow-y: scroll;
+
+  background: #000;
+  color: greenyellow;
+
+  pre {
+    white-space: pre-wrap;
+  }
+}

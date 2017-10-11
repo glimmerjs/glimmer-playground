@@ -42,6 +42,12 @@
     <div class="pane vm">
       <Sandbox @fs={{fs}} @onUnknownComponent={{action saveUnknownComponent}} />
     </div>
+
+    {{#if isVisualizerShowing}}
+      <Visualizer @fs={{fs}} />
+    {{/if}}
+
+    <button class="toggle-visualizer" onclick={{action toggleVisualizer}}>π</button>
   {{else}}
     <div class="pane editor">
       <div class="loading">

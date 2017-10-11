@@ -45,13 +45,13 @@ const NEW_COMPONENT_NAMES = [
 const DEFAULT_APP = [{
   name: 'GlimmerApp',
   template: {
-    fileName: pathForTemplate('my-glimmer-app'),
+    fileName: pathForTemplate('GlimmerApp'),
     sourceText: `<h1>Welcome to Glimmer!</h1>
 <p>You have clicked the button {{count}} times.</p>
 <button onclick={{action increment}}>Click</button>`
   },
   component: {
-    fileName: pathForComponent('my-glimmer-app'),
+    fileName: pathForComponent('GlimmerApp'),
     sourceText: `import Component, { tracked } from '@glimmer/component';
 export default class extends Component {
   @tracked count = 1;
@@ -173,6 +173,12 @@ export default class extends Component {
     if (files.component) { files.component.remove(); }
 
     this.components = this.components.filter(c => c !== files);
+  }
+
+  @tracked isVisualizerShowing = true;
+
+  toggleVisualizer() {
+    this.isVisualizerShowing = !this.isVisualizerShowing;
   }
 }
 
