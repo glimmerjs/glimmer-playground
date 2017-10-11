@@ -26,6 +26,10 @@ glimmer-visualizer {
     padding-left: 17px;
   }
 
+  .operand .name {
+    color: $green;
+  }
+
   .operand .raw-value {
     color: $base1;
   }

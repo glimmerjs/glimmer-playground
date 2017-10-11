@@ -6,14 +6,19 @@
       {{#if op.operands}}
         <div class="operands">
           {{#each op.operands key="@index" as |operand|}}
-            <span class="operand {{operand.type}}">
+            <div class="operand {{operand.type}}">
+             {{#if operand.name}}
+               <span class="name">
+                 {{operand.name}}:
+               </span>
+              {{/if}}
               <span class="value">
                 {{operand.value}}
               </span>
               <span class="raw-value">
                 ({{hex operand.rawValue}})
               </span>
-            </span>
+            </div>
           {{/each}}
         </div>
       {{/if}}
