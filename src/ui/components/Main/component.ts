@@ -175,7 +175,7 @@ export default class extends Component {
     this.components = this.components.filter(c => c !== files);
   }
 
-  @tracked isVisualizerShowing = true;
+  @tracked isVisualizerShowing = false;
 
   toggleVisualizer() {
     this.isVisualizerShowing = !this.isVisualizerShowing;
