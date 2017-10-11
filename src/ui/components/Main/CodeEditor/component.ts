@@ -6,8 +6,11 @@ import debounce from 'lodash.debounce';
 
 export default class CodeEditor extends Component {
   editor: monaco.editor.IStandaloneCodeEditor;
-  element: HTMLDivElement;
   resize: (event: Event) => void;
+
+  get element(): HTMLElement {
+    return this.bounds.firstNode as HTMLElement;
+  }
 
   didInsertElement() {
     let { file } = this.args;

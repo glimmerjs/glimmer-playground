@@ -7,40 +7,40 @@
           <h2 class="component-name">
               <span class="bracket">&lt;</span>
               {{~#if component.isEditable~}}
-                <editable-title @value={{component.name}} @onChange={{action componentNameDidChange component}} />
+                <EditableTitle @value={{component.name}} @onChange={{action componentNameDidChange component}} />
               {{~else~}}
                 {{component.name}}
               {{~/if~}}
               <span class="bracket">&gt;</span>
               {{#if component.isEditable}}
-                <remove-button @onClick={{action removeComponent component}} />
+                <RemoveButton @onClick={{action removeComponent component}} />
               {{/if}}
           </h2>
           <div class="file template">
             <h3 class="file-name">template.hbs</h3>
-            <code-editor @file={{component.template}} />
+            <CodeEditor @file={{component.template}} />
           </div>
           {{#if component.component}}
             <div class="file implementation">
               <h3 class="file-name">
                 component.ts
-                <remove-button @onClick={{action removeComponentImplementation component}} />
+                <RemoveButton @onClick={{action removeComponentImplementation component}} />
               </h3>
-              <code-editor @file={{component.component}} />
+              <CodeEditor @file={{component.component}} />
             </div>
           {{else}}
             <div class="file add-implementation">
-              <repl-button @onClick={{action addComponentImplementation component}} @title="Add TypeScript" />
+              <Button @onClick={{action addComponentImplementation component}} @title="Add TypeScript" />
             </div>
           {{/if}}
         </div>
       {{/each}}
 
-      <repl-button @onClick={{action createNewComponent}} @title="Create New Component" />
+      <Button @onClick={{action createNewComponent}} @title="Create New Component" />
     </div>
 
     <div class="pane vm">
-      <glimmer-sandbox @fs={{fs}} @onUnknownComponent={{action saveUnknownComponent}} />
+      <Sandbox @fs={{fs}} @onUnknownComponent={{action saveUnknownComponent}} />
     </div>
   {{else}}
     <div class="pane editor">
