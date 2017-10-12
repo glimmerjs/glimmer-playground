@@ -3,6 +3,9 @@ import { compile } from "./compiler";
 import { ConstantPool } from "@glimmer/program";
 import { TYPE_MASK, OPERAND_LEN_MASK, ARG_SHIFT } from '@glimmer/encoder';
 
+import { toHex } from '../hex/helper';
+import hexdump from './hexdump';
+
 export function inspect(map: {}) {
   let templates = {};
 
@@ -13,8 +16,19 @@ export function inspect(map: {}) {
     }
   }
 
-  let compilation = compile(templates);
-  return opcodes(compilation.heap.buffer, compilation.pool);
+  let { heap, pool } = compile(templates);
+
+  let buffer = Array.from(new Uint8Array(heap.buffer))
+    .map(n => toHex(n));
+
+  let opcodes = inspectOpcodes(heap.buffer, pool);
+
+  return {
+    hexdump: hexdump(heap.buffer),
+    buffer,
+    opcodes,
+    pool
+  };
 }
 
 const UNKNOWN_OP = {
@@ -23,7 +37,7 @@ const UNKNOWN_OP = {
   ops: []
 };
 
-function opcodes(buffer: ArrayBuffer, pool: ConstantPool) {
+function inspectOpcodes(buffer: ArrayBuffer, pool: ConstantPool) {
   let bytes = new Uint16Array(buffer);
   let pc = 0;
   let ops = [];
@@ -69,3 +83,4 @@ function operandFor(operand: Operand, rawValue: any, pool: ConstantPool) {
     value
   };
 }
+

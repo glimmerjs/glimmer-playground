@@ -39,6 +39,12 @@ glimmer-visualizer {
       color: $blue;
     }
   }
+
+  .hexdump {
+    pre {
+      font-family: Menlo, Courier, monospace;
+    }
+  }
   
   .bytecode {
     margin-top: 17px;

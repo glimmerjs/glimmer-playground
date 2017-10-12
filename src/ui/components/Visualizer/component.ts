@@ -16,7 +16,7 @@ export default class Visualizer extends Component {
   };
 
   @tracked('args')
-  get opcodes() {
+  get compilation() {
     let { fs } = this.args;
 
     let resolutionMap = fs.toResolutionMap();

@@ -1,37 +1,32 @@
 <glimmer-visualizer>
   <div class="decompiled">
-  {{#each opcodes key="@index" as |op|}}
-    <div class="op">
-      <span class="opcode">{{hex op.opcode}}</span>
-      <span class="name">{{op.name}}</span>
-      {{#if op.operands}}
-        <div class="operands">
-          {{#each op.operands key="@index" as |operand|}}
-            <div class="operand {{operand.type}}">
-             {{#if operand.name}}
-               <span class="name">
-                 {{operand.name}}:
-               </span>
-              {{/if}}
-              <span class="raw-value">
-                {{hex operand.rawValue}}
-              </span>
-              <span class="value">
-                {{operand.value}}
-              </span>
-            </div>
-          {{/each}}
-        </div>
-      {{/if}}
-    </div>
-  {{/each}}
-  </div>
-  <div class="bytecode">
-    {{#each opcodes key="@index" as |op|}}
-      <span class="opcode">{{hex op.opcode}}</span>
-      {{#each op.operands key="@index" as |operand|}}
-        <span class="operand">{{hex operand.rawValue}}</span>
-      {{/each}}
+    {{#each compilation.opcodes key="@index" as |op|}}
+      <div class="op">
+        <span class="opcode">{{hex op.opcode}}</span>
+        <span class="name">{{op.name}}</span>
+        {{#if op.operands}}
+          <div class="operands">
+            {{#each op.operands key="@index" as |operand|}}
+              <div class="operand {{operand.type}}">
+              {{#if operand.name}}
+                <span class="name">
+                  {{operand.name}}:
+                </span>
+                {{/if}}
+                <span class="raw-value">
+                  {{hex operand.rawValue}}
+                </span>
+                <span class="value">
+                  {{operand.value}}
+                </span>
+              </div>
+            {{/each}}
+          </div>
+        {{/if}}
+      </div>
     {{/each}}
+  </div>
+  <div class="hexdump">
+    <pre>{{compilation.hexdump}}</pre>
   </div>
 </glimmer-visualizer>
