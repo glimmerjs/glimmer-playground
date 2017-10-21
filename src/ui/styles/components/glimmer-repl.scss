@@ -47,7 +47,7 @@ glimmer-repl {
     margin: 32px 0 0 5px;
   }
 
-  h2.component-name {
+  h2.component-name, h2.helper-name {
     margin: 15px 17px 15px;
     padding: 4px 0;
     font-weight: normal;
@@ -77,7 +77,7 @@ glimmer-repl {
   }
 
   .add-implementation [is="repl-button"] {
-    margin-left: 27px; 
+    margin-left: 27px;
   }
 
   .title {

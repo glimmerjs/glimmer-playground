@@ -2,7 +2,7 @@ import { File } from './file-system';
 import * as GlimmerComponent from '@glimmer/component';
 import compileTypeScript from './compilers/compile-typescript';
 import compileTemplate from './compilers/compile-template';
-import { specifierForTemplate, specifierForComponent } from "./specifiers";
+import { specifierForTemplate, specifierForComponent, specifierForHelper } from "./specifiers";
 
 export default class ResolutionMap {
   files: File[];
@@ -23,7 +23,11 @@ export default class ResolutionMap {
           map[specifier] = compileTemplate(specifier, sourceText);
           break;
         case 'typescript':
-          specifier = specifierForComponent(fileName);
+          if (fileName.indexOf('helper.ts') > -1) {
+            specifier = specifierForHelper(fileName);
+          } else {
+            specifier = specifierForComponent(fileName);
+          }
           let code = compileTypeScript(fileName, sourceText);
           let mod = evalTypeScript(code);
           if (!mod || !mod.default) { throw new Error(`${fileName} did not export a default export.`); }

@@ -1,4 +1,5 @@
 <glimmer-repl>
+  {{foo}}
   {{#if isLoaded}}
     <div class="pane editor">
       <h1 class="title">Glimmer Playground</h1>
@@ -16,10 +17,13 @@
                 <RemoveButton @onClick={{action removeComponent component}} />
               {{/if}}
           </h2>
+          {{#if component.template}}
           <div class="file template">
             <h3 class="file-name">template.hbs</h3>
             <CodeEditor @file={{component.template}} />
           </div>
+          {{/if}}
+
           {{#if component.component}}
             <div class="file implementation">
               <h3 class="file-name">
@@ -36,7 +40,34 @@
         </div>
       {{/each}}
 
+      {{#each helpers key="id" as |helper|}}
+        <div class="helper">
+          <h2 class="helper-name">
+              <span class="bracket">{{curly '{{'}}</span>
+              {{~#if helper.isEditable~}}
+                <EditableTitle @value={{helper.name}} @onChange={{action helperNameDidChange helper}} />
+              {{~else~}}
+                {{component.name}}
+              {{~/if~}}
+              <span class="bracket">{{curly '}}'}}</span>
+              {{#if helper.isEditable}}
+                <RemoveButton @onClick={{action removeHelper helper}} />
+              {{/if}}
+          </h2>
+        {{#if helper.helper}}
+          <div class="file implementation">
+            <h3 class="file-name">
+              helper.ts
+              <RemoveButton @onClick={{action removeHelperImplementation helper}} />
+            </h3>
+            <CodeEditor @file={{helper.helper}} />
+          </div>
+        {{/if}}
+        </div>
+      {{/each}}
+
       <Button @onClick={{action createNewComponent}} @title="Create New Component" />
+      <Button @onClick={{action createNewHelper}} @title="Create New Helper" />
     </div>
 
     <div class="pane vm">

@@ -42,6 +42,7 @@ export default class GlimmerSandbox extends Component {
       this.lastError = e.toString();
       return;
     }
+
     let component = this;
 
     class App extends Application {

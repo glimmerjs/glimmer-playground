@@ -9,3 +9,9 @@ export function specifierForComponent(fileName: string) {
   let name = segments[segments.length-2];
   return `component:/glimmer-repl/components/${name}`;
 }
+
+export function specifierForHelper(fileName: string) {
+  let segments = fileName.split('/')
+  let name = segments[segments.length-2];
+  return `helper:/glimmer-repl/components/${name}`;
+}
