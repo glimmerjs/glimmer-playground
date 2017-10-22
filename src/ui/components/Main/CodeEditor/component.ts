@@ -59,7 +59,7 @@ function modelFor(file: File) {
   let uri = monaco.Uri.parse(`file:///${fileName}`);
 
   let model = monaco.editor.getModel(uri);
-  
+
   if (!model) {
     model = monaco.editor.createModel(sourceText, language, uri);
 

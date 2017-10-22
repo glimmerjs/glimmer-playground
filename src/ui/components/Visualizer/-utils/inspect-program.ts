@@ -8,15 +8,20 @@ import hexdump from './hexdump';
 
 export function inspect(map: {}) {
   let templates = {};
+  let helpers = {};
 
   for (let specifier in map) {
     let [type, path] = specifier.split(':');
     if (type === 'template') {
       templates[specifier] = map[specifier];
     }
+
+    if (type === 'helper') {
+      helpers[specifier] = map[specifier];
+    }
   }
 
-  let { heap, pool } = compile(templates);
+  let { heap, pool } = compile(templates, helpers);
 
   let buffer = Array.from(new Uint8Array(heap.buffer))
     .map(n => toHex(n));

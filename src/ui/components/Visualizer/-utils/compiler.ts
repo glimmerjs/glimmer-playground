@@ -4,8 +4,8 @@ import { CompilableTemplate, CompileOptions } from "@glimmer/opcode-compiler";
 import { CompilableTemplate as ICompilableTemplate } from "@glimmer/runtime";
 import { SerializedTemplateBlock } from "@glimmer/wire-format";
 
-export function compile(templates: {}) {
-  let delegate = new VisualizerCompilerDelegate(templates);
+export function compile(templates: {}, helpers: {}) {
+  let delegate = new VisualizerCompilerDelegate(templates, helpers);
   let bundle = new BundleCompiler(delegate);
 
   for (let specifier in templates) {
@@ -32,12 +32,12 @@ const capabilities: ComponentCapabilities = {
 };
 
 class VisualizerCompilerDelegate implements CompilerDelegate {
-  constructor(private map: {}) {
+  constructor(private templates: {}, private helpers: {}) {
   }
 
   hasComponentInScope(componentName: string, referrer: Specifier): boolean {
     let key = `template:/glimmer-repl/components/${componentName}`;
-    return key in this.map;
+    return key in this.templates;
   }
 
   resolveComponentSpecifier(componentName: string, referrer: Specifier): Specifier {
@@ -51,7 +51,12 @@ class VisualizerCompilerDelegate implements CompilerDelegate {
     return CompilableTemplate.topLevel(block, options);
   }
   hasHelperInScope(helperName: string, referrer: Specifier): boolean {
-    return helperName === 'action';
+    if (helperName === 'action' || helperName === 'if') {
+      return true;
+    }
+
+    let key = `helper:/glimmer-repl/components/${helperName}`;
+    return key in this.helpers;
   }
 
   resolveHelperSpecifier(helperName: string, referrer: Specifier): Specifier {

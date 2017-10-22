@@ -26,10 +26,33 @@ class ComponentFiles {
   }
 
   static fromJSON(fs: FileSystem, files) {
-    let { template, component } = files;
+    let { template, component, helper } = files;
     files.template = fs.createFileFromJSON(template);
     files.component = component ? fs.createFileFromJSON(component) : null;
     return new ComponentFiles(files)
+  }
+}
+
+class HelperFiles {
+  id: number;
+  isEditable = true;
+  @tracked name: string;
+  @tracked helper: File;
+
+  constructor(options: Partial<HelperFiles>) {
+    this.id = _id++;
+    Object.assign(this, options);
+  }
+
+  toJSON() {
+    let { name, helper } = this;
+    return { name, helper };
+  }
+
+  static fromJSON(fs: FileSystem, files) {
+    let { helper } = files;
+    files.helper = helper ? fs.createFileFromJSON(helper) : null;
+    return new this(files)
   }
 }
 
@@ -42,28 +65,32 @@ const NEW_COMPONENT_NAMES = [
   'CalmDownWithTheComponents'
 ];
 
-const DEFAULT_APP = [{
-  name: 'GlimmerApp',
-  template: {
-    fileName: pathForTemplate('GlimmerApp'),
-    sourceText: `<h1>Welcome to Glimmer!</h1>
+const DEFAULT_APP = {
+  helpers: [],
+  components: [{
+    name: 'GlimmerApp',
+    template: {
+      fileName: pathForTemplate('GlimmerApp'),
+      sourceText: `<h1>Welcome to Glimmer!</h1>
 <p>You have clicked the button {{count}} times.</p>
 <button onclick={{action increment}}>Click</button>`
-  },
-  component: {
-    fileName: pathForComponent('GlimmerApp'),
-    sourceText: `import Component, { tracked } from '@glimmer/component';
+    },
+    component: {
+      fileName: pathForComponent('GlimmerApp'),
+      sourceText: `import Component, { tracked } from '@glimmer/component';
 export default class extends Component {
   @tracked count = 1;
   increment() {
     this.count++;
   }
 }`
-  }
-}];
+    }
+  }]
+};
 
 export default class GlimmerRepl extends Component {
   @tracked components: ComponentFiles[] = [];
+  @tracked helpers: HelperFiles[] = [];
   @tracked isLoaded = false;
 
   fs = new FileSystem();
@@ -80,10 +107,12 @@ export default class GlimmerRepl extends Component {
   init() {
     let { fs } = this;
 
-    let components = this.initComponents();
+    let { components, helpers } = this.initComponents();
     this.components = components
       .map(json => ComponentFiles.fromJSON(fs, json));
     this.components[0].isEditable = false;
+
+    this.helpers = helpers.map(json => HelperFiles.fromJSON(fs, json));
 
     fs.onChange(() => {
       this.serialize();
@@ -99,7 +128,9 @@ export default class GlimmerRepl extends Component {
 
   @debounce(200)
   serialize() {
-    let serialized = JSON.stringify(this.components);
+    let { components, helpers } = this;
+    let serializable = { components, helpers }
+    let serialized = JSON.stringify(serializable);
     let encoded = btoa(encodeURIComponent(serialized));
     history.replaceState(null, null, `?app=${encoded}`);
   }
@@ -121,6 +152,20 @@ export default class GlimmerRepl extends Component {
 
   saveUnknownComponent(componentName: string) {
     this.lastUnknownComponent = componentName;
+  }
+
+  createNewHelper() {
+    let name = `helper${this.helpers.length + 1}`
+    let helperPath = pathForHelper(name);
+    let helper = this.fs.createFile(helperPath, `export default function helper() {}`);
+
+    let files = new HelperFiles({
+      name,
+      helper,
+    });
+
+    this.helpers = [...this.helpers, files];
+    this.serialize();
   }
 
   createNewComponent() {
@@ -156,6 +201,23 @@ export default class extends Component {
     this.components = this.components;
   }
 
+  removeHelperImplementation(files: HelperFiles) {
+    files.helper.remove();
+    files.helper = null;
+    this.helpers = this.helpers;
+  }
+
+  private nameChanged(files: ComponentFiles | HelperFiles, name) {
+    files.name = name;
+    this.fs.didChange();
+  }
+
+  helperNameDidChange(files: HelperFiles, name: string) {
+    let { helper } = files;
+    helper.fileName = pathForHelper(name);
+    this.nameChanged(files, name);
+  }
+
   componentNameDidChange(files: ComponentFiles, name: string) {
     let { component, template } = files;
 
@@ -164,8 +226,12 @@ export default class extends Component {
       component.fileName = pathForComponent(name);
     }
 
-    files.name = name;
-    this.fs.didChange();
+    this.nameChanged(files, name);
+  }
+
+  removeHelper(files: HelperFiles) {
+    files.helper.remove();
+    this.helpers = this.helpers.filter(h => h !== files);
   }
 
   removeComponent(files: ComponentFiles) {
@@ -184,6 +250,10 @@ export default class extends Component {
 
 function pathForTemplate(name) {
   return `src/ui/components/${name}/template.hbs`;
+}
+
+function pathForHelper(name) {
+  return `src/ui/components/${name}/helper.ts`;
 }
 
 function pathForComponent(name) {
