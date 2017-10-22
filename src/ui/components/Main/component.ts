@@ -72,18 +72,18 @@ const DEFAULT_APP = {
     template: {
       fileName: pathForTemplate('GlimmerApp'),
       sourceText: `<h1>Welcome to Glimmer!</h1>
-  <p>You have clicked the button {{count}} times.</p>
-  <button onclick={{action increment}}>Click</button>`
+<p>You have clicked the button {{count}} times.</p>
+<button onclick={{action increment}}>Click</button>`
     },
     component: {
       fileName: pathForComponent('GlimmerApp'),
       sourceText: `import Component, { tracked } from '@glimmer/component';
-  export default class extends Component {
-    @tracked count = 1;
-    increment() {
-      this.count++;
-    }
-  }`
+export default class extends Component {
+  @tracked count = 1;
+  increment() {
+    this.count++;
+  }
+}`
     }
   }]
 };
