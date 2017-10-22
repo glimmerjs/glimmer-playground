@@ -42,13 +42,13 @@
       {{#each helpers key="id" as |helper|}}
         <div class="helper">
           <h2 class="helper-name">
-              <span class="bracket">{{curly '{{'}}</span>
+              <span class="bracket">\{{</span>
               {{~#if helper.isEditable~}}
                 <EditableTitle @value={{helper.name}} @onChange={{action helperNameDidChange helper}} />
               {{~else~}}
                 {{component.name}}
               {{~/if~}}
-              <span class="bracket">{{curly '}}'}}</span>
+              <span class="bracket">}}</span>
               {{#if helper.isEditable}}
                 <RemoveButton @onClick={{action removeHelper helper}} />
               {{/if}}
