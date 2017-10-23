@@ -22,7 +22,6 @@ export function compile(templates: {}, helpers: {}) {
 }
 
 const capabilities: ComponentCapabilities = {
-  staticDefinitions: false,
   dynamicLayout: false,
   dynamicTag: true,
   prepareArgs: false,
