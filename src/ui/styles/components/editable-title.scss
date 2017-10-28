@@ -13,6 +13,9 @@ editable-title {
   > input {
     border: 0;
     background-color: $base02;
+    color: $blue;
+    font-size: 1.2rem;
+    @include monospace;
     outline: none;
   }
 }
