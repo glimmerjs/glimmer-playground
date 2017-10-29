@@ -11,11 +11,6 @@ export default class extends Component {
     return this.bounds.firstNode as HTMLElement;
   }
 
-  didInsertElement() {
-    let style = window.getComputedStyle(this.element);
-    this.inputStyle = `font: ${style.font}; color: ${style.color};`;
-  }
-
   didUpdate() {
     setTimeout(() => {
       let input: HTMLElement = this.element.querySelector('input');
