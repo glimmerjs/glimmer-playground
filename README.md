@@ -1,4 +1,4 @@
-# Glimmerjs Playground
+# Glimmer Playground
 
 This project provides a an interactive development environment for people looking to try Glimmerjs. 
 See it live at [https://try.glimmerjs.com](https://try.glimmerjs.com).
