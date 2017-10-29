@@ -201,12 +201,6 @@ export default class extends Component {
     this.components = this.components;
   }
 
-  removeHelperImplementation(files: HelperFiles) {
-    files.helper.remove();
-    files.helper = null;
-    this.helpers = this.helpers;
-  }
-
   private nameChanged(files: ComponentFiles | HelperFiles, name) {
     files.name = name;
     this.fs.didChange();
