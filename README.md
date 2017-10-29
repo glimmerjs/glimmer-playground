@@ -1,6 +1,7 @@
-# glimmer-repl
+# Glimmerjs Playground
 
-See it live at https://glimmer-playground.netlify.com
+This project provides a an interactive development environment for people looking to try Glimmerjs. 
+See it live at [https://try.glimmerjs.com](https://try.glimmerjs.com).
 
 ## Prerequisites
 
@@ -29,5 +30,5 @@ You will need the following things properly installed on your computer.
 
 ## Further Reading / Useful Links
 
-* [glimmerjs](http://github.com/tildeio/glimmer/)
+* [glimmer.js](http://github.com/glimmerjs/glimmer.js/)
 * [ember-cli](https://ember-cli.com/)
