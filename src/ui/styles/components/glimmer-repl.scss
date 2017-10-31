@@ -48,8 +48,11 @@ glimmer-repl {
   }
 
   h2.component-name, h2.helper-name {
-    margin: 15px 17px 15px;
-    padding: 4px 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 6px 15px;
     font-weight: normal;
     font-size: 1.2rem;
     color: $blue;
@@ -60,7 +63,12 @@ glimmer-repl {
     }
 
     button.remove {
-      margin-left: -9px;
+      top: 2px;
+      margin-left: 10px;
+    }
+
+    button.confirm {
+      margin-left: 15px;
     }
   }
 
@@ -71,9 +79,21 @@ glimmer-repl {
   }
 
   .file-name {
+    display: flex;
+    align-items: center;
+    min-height: 24px;
     font-weight: normal;
     font-size: 0.8rem;
     margin: 15px 17px 15px 27px;
+
+    button.remove {
+      margin-top: 2px;
+      margin-left: 10px;
+    }
+
+    button.confirm {
+      margin-left: 15px;
+    }
   }
 
   .add-implementation [is="repl-button"] {
