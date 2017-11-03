@@ -1,1 +1,6 @@
-<button class="remove" onclick={{action @onClick}}>×</button>
+{{#if confirm}}
+  <button class="confirm" onclick={{action toggle}}>Cancel</button>
+  <button class="confirm yes" onclick={{action @onClick}}>Yes, Remove</button>
+{{else}}
+  <button class="remove" onclick={{action toggle}} title="Remove" aria-label="Remove"></button>
+{{/if}}
