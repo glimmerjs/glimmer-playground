@@ -18,8 +18,6 @@ glimmer-repl {
 
       overflow: scroll;
     }
-
-    padding: 32px 0;
   }
 
   .vm {
@@ -31,7 +29,7 @@ glimmer-repl {
       min-height: 100vh;
     }
 
-    padding: 32px;
+    padding: 23px 32px 32px 32px;
   }
 
   .editor {
@@ -39,12 +37,7 @@ glimmer-repl {
       right: 50%;
     }
 
-    border-right: 1px solid #ddd;
     @include solarized-dark;
-  }
-
-  .editor > [is="repl-button"] {
-    margin: 32px 0 0 5px;
   }
 
   h2.component-name, h2.helper-name {
@@ -72,6 +65,10 @@ glimmer-repl {
     }
   }
 
+  .component:first-of-type h2.component-name {
+    padding-top: 15px;
+  }
+
   @include desktop {
     .file {
       padding-left: 32px;
@@ -84,7 +81,7 @@ glimmer-repl {
     min-height: 24px;
     font-weight: normal;
     font-size: 0.8rem;
-    margin: 15px 17px 15px 27px;
+    margin: 0 17px 15px 27px;
 
     button.remove {
       margin-top: 2px;
@@ -96,9 +93,14 @@ glimmer-repl {
     }
   }
 
-  .add-implementation [is="repl-button"] {
-    margin-left: 27px;
+  .add-implementation {
+    margin-bottom: 12px;
+  
+    .button {
+      margin-left: 27px;
+    }
   }
+
 
   .title {
     text-align: center;

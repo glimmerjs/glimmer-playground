@@ -1,7 +1,18 @@
 <glimmer-repl>
   {{#if isLoaded}}
     <div class="pane editor">
-      <h1 class="title">Glimmer Playground</h1>
+      <header class="header">
+        <div class="editor-actions">
+          <Button @onClick={{action createNewComponent}} @title="Add Component" />
+          <Button @onClick={{action createNewHelper}} @title="Add Helper" />
+        </div>
+        <span class="glimmerjs-com">
+          <a href="https://glimmerjs.com" class="logo" title="glimmerjs.com"></a>
+          <a href="https://glimmerjs.com/guides/installing">Guides</a>
+          <a href="https://glimmerjs.com/api">API Docs</a>
+          <a href="https://github.com/glimmerjs">Github</a>
+        </span>
+      </header>
       {{#each components key="id" as |component|}}
         <div class="component">
           <h2 class="component-name">
@@ -63,9 +74,6 @@
         {{/if}}
         </div>
       {{/each}}
-
-      <Button @onClick={{action createNewComponent}} @title="Create New Component" />
-      <Button @onClick={{action createNewHelper}} @title="Create New Helper" />
     </div>
 
     <div class="pane vm">

@@ -39,9 +39,8 @@ button.remove {
 button.confirm {
   position: relative;
   border: 0;
-  border-bottom: 1px solid $base0;
   padding: 0;
-  color: $base0;
+  color: #fff;
   font-size: 0.7rem;
   @include monospace;
   cursor: pointer;
@@ -49,6 +48,5 @@ button.confirm {
 
   &.yes {
     color: $red;
-    border-bottom-color: $red;
   }
 }
