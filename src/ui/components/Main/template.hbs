@@ -22,7 +22,7 @@
       </header>
       {{#each components key="id" as |component|}}
         <div class="component">
-          <h2 class="component-name">
+          <h1 class="component-name">
               <span class="bracket">&lt;</span>
               {{~#if component.isEditable~}}
                 <EditableTitle @value={{component.name}} @onChange={{action componentNameDidChange component}} />
@@ -33,35 +33,38 @@
               {{#if component.isEditable}}
                 <RemoveButton @onClick={{action removeComponent component}} />
               {{/if}}
-          </h2>
-          {{#if component.template}}
-          <div class="file template">
-            <h3 class="file-name">template.hbs</h3>
-            <CodeEditor @file={{component.template}} />
-          </div>
-          {{/if}}
+              <span class="toggle {{if component.isVisible "" "hidden"}}" onclick={{action toggleVisibility component}} title="toggle" aria-label="toggle"></span>
+          </h1>
+          {{#if component.isVisible}}
+            {{#if component.template}}
+            <div class="file template">
+              <h2 class="file-name">template.hbs</h2>
+              <CodeEditor @file={{component.template}} />
+            </div>
+            {{/if}}
 
-          {{#if component.component}}
-            <div class="file implementation">
-              <h3 class="file-name">
-                component.ts
-                <RemoveButton @onClick={{action removeComponentImplementation component}} />
-              </h3>
-              <CodeEditor @file={{component.component}} />
-            </div>
-          {{else}}
-            <div class="file add-implementation">
-              <button class="button" onclick={{action addComponentImplementation component}}>
-                Add TypeScript
-              </button>
-            </div>
+            {{#if component.component}}
+              <div class="file implementation">
+                <h2 class="file-name">
+                  component.ts
+                  <RemoveButton @onClick={{action removeComponentImplementation component}} />
+                </h2>
+                <CodeEditor @file={{component.component}} />
+              </div>
+            {{else}}
+              <div class="file add-implementation">
+                <button class="button" onclick={{action addComponentImplementation component}}>
+                  Add TypeScript
+                </button>
+              </div>
+            {{/if}}
           {{/if}}
         </div>
       {{/each}}
 
       {{#each helpers key="id" as |helper|}}
         <div class="helper">
-          <h2 class="helper-name">
+          <h1 class="helper-name">
               <span class="bracket">\{{</span>
               {{~#if helper.isEditable~}}
                 <EditableTitle @value={{helper.name}} @onChange={{action helperNameDidChange helper}} />
@@ -72,15 +75,18 @@
               {{#if helper.isEditable}}
                 <RemoveButton @onClick={{action removeHelper helper}} />
               {{/if}}
-          </h2>
-        {{#if helper.helper}}
-          <div class="file implementation">
-            <h3 class="file-name">
-              helper.ts
-            </h3>
-            <CodeEditor @file={{helper.helper}} />
-          </div>
-        {{/if}}
+              <span class="toggle {{if helper.isVisible "" "hidden"}}" onclick={{action toggleVisibility helper}} title="toggle" aria-label="toggle"></span>
+          </h1>
+          {{#if helper.isVisible}}
+            {{#if helper.helper}}
+              <div class="file implementation">
+                <h2 class="file-name">
+                  helper.ts
+                </h2>
+                <CodeEditor @file={{helper.helper}} />
+              </div>
+            {{/if}}
+          {{/if}}
         </div>
       {{/each}}
     </div>

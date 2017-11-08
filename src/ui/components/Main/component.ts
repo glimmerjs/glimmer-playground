@@ -16,6 +16,7 @@ class ComponentFiles {
   @tracked name: string;
   @tracked template: File;
   @tracked component: File;
+  @tracked isVisible: boolean = true;
 
   constructor(options: Partial<ComponentFiles>) {
     this.id = _id++;
@@ -40,6 +41,7 @@ class HelperFiles {
   isEditable = true;
   @tracked name: string;
   @tracked helper: File;
+  @tracked isVisible: boolean = true;
 
   constructor(options: Partial<HelperFiles>) {
     this.id = _id++;
@@ -294,6 +296,10 @@ export default class extends Component {
         saveAs(content, 'glimmer-playground.zip');
       });
     });
+  }
+
+  toggleVisibility(files: ComponentFiles | HelperFiles) {
+    files.isVisible = !files.isVisible;
   }
 }
 
