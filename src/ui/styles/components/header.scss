@@ -1,0 +1,66 @@
+.header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.075);
+
+  .button {
+    flex-grow: 1;
+    margin: 0 15px 10px 15px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .button:first-of-type {
+    margin-right: 0;
+  }
+}
+
+.editor-actions {
+  min-width: 100%;
+  display: flex;
+  order: 1;
+  justify-content: flex-end;
+}
+
+.glimmerjs-com {
+  display: flex;
+  height: 100%;
+  margin-left: 15px;
+  line-height: #{$header-height - 2px};
+
+  a {
+    margin-right: 15px;
+    color: #bbb;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  .logo {
+    padding-left: 26px;
+    background-image: url(images/favicon.png);
+    background-position: left;
+    background-repeat: no-repeat;
+    background-size: 24px;
+  }
+}
+
+@media only screen
+        and (min-width : 560px)
+        and (max-width : $breakpoint-mobile)
+          , (min-width : 1150px) {
+  .glimmerjs-com {
+    flex-grow: 1;
+    justify-content: flex-end;
+  }
+
+  .header .button {
+    margin: 0 0 0 15px;
+  }
+
+  .editor-actions {
+    order: 0;
+    min-width: auto;
+  }
+}

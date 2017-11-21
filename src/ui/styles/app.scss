@@ -1,10 +1,14 @@
+$glimmer-orange: #F5835F;
+$header-height: 50px;
+
 @import "./responsive";
 @import "./solarized";
 @import "./typography";
 
 @import "./components/glimmer-repl";
-@import "./components/repl-button";
+@import "./components/button";
 @import "./components/editable-title";
+@import "./components/header";
 @import "./components/glimmer-sandbox";
 @import "./components/remove-button";
 @import "./components/Visualizer";
