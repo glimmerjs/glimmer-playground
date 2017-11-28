@@ -1,0 +1,55 @@
+<div class="overlay share-overlay animation-fade-in" role="dialog" aria-labelledby="share-overlay-header">
+  <div class="overlay-container">
+    <h1 id="share-overlay-header" tabindex="0">Share Project</h1>
+
+    <button class="overlay-close" onclick={{action @toggle}} aria-label="close" title="close">
+      <div aria-hidden="true"></div>
+    </button>
+    
+    <label for="full-url-field" class="label">Full URL</label>
+    <div class="field">
+      <input id="full-url-field" value={{fullUrl}}>
+      <button class="button" onclick={{action copyToClipboard "full-url-field" "fullUrlCopied"}}>
+        Copy to Clipboard
+        {{#if fullUrlCopied}}
+          <div class="success-badge animation-bounce-in" aria-label="copied"></div>
+        {{/if}}
+      </button>
+    </div>
+
+    <label for="tinyurl-field" class="label">Tinyurl</label>
+    <div class="field">
+      <input id="tinyurl-field" value={{tinyUrl}} placeholder="http://tinyurl.com/...">
+      {{#if tinyUrl}}
+        <button class="button" onclick={{action copyToClipboard "tinyurl-field" "tinyUrlCopied"}}>
+          Copy to Clipboard
+          {{#if tinyUrlCopied}}
+            <div class="success-badge animation-bounce-in" aria-label="copied"></div>
+          {{/if}}
+        </button>
+      {{else}}
+        <button class="button" onclick={{action generateTinyurl}}>Shorten URL</button>
+      {{/if}}
+    </div>
+
+    <label class="label">Download Project</label>
+    <div class="field">
+      <p class="download-zip-instructions">
+        <svg xmlns="http://www.w3.org/2000/svg" width="29" height="24" viewBox="0 0 29 24">
+          <g fill="none" fill-rule="evenodd">
+            <rect width="27" height="22" x="1" y="1" stroke="#000000" stroke-width="2"/>
+            <rect width="6" height="1.5" x="16" y="16" fill="#000000"/>
+            <polygon fill="#000000" points="8.002 7 13 12.004 8.002 17.008 7.05 15.954 11.006 11.997 7 7.991"/>
+          </g>
+        </svg>
+        To run the project after downloading, open the zip file, navigate to the new directory in your terminal and execute the following command:<br>
+        <code>ember init -b @glimmer/blueprint</code>
+      </p>
+      {{#if @loading}}
+        <button class="button">Loading...</button>
+      {{else}}
+        <button onclick={{action @download}} class="button">Download Project</button>
+      {{/if}}
+    </div>
+  </div>
+</div>

@@ -1,17 +1,23 @@
 $glimmer-orange: #F5835F;
 $header-height: 50px;
 
+@import "./animations";
 @import "./responsive";
 @import "./solarized";
 @import "./typography";
 
 @import "./components/glimmer-repl";
-@import "./components/button";
 @import "./components/editable-title";
-@import "./components/header";
 @import "./components/glimmer-sandbox";
-@import "./components/remove-button";
-@import "./components/Visualizer";
+@import "./components/glimmer-visualizer";
+@import "./components/share";
+
+@import "./ui/badge-success";
+@import "./ui/button";
+@import "./ui/button-confirm";
+@import "./ui/button-remove";
+@import "./ui/header";
+@import "./ui/overlay";
 
 * {
   box-sizing: border-box;

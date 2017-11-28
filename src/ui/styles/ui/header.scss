@@ -2,17 +2,22 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  min-height: $header-height;
   border-bottom: 1px solid rgba(255, 255, 255, 0.075);
 
   .button {
     flex-grow: 1;
-    margin: 0 15px 10px 15px;
+    margin: 0 10px 10px 0;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
   }
 
   .button:first-of-type {
-    margin-right: 0;
+    margin-left: 15px;
+  }
+
+  .button:last-of-type {
+    margin-right: 15px;
   }
 }
 
@@ -47,16 +52,16 @@
 }
 
 @media only screen
-        and (min-width : 560px)
-        and (max-width : $breakpoint-mobile)
-          , (min-width : 1150px) {
+        and (min-width : 630px)
+        and (max-width : #{$breakpoint-mobile - 1px})
+          , (min-width : 1250px) {
   .glimmerjs-com {
     flex-grow: 1;
     justify-content: flex-end;
   }
 
   .header .button {
-    margin: 0 0 0 15px;
+    margin: 0 0 0 10px;
   }
 
   .editor-actions {
