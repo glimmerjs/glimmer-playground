@@ -13,6 +13,7 @@ glimmer-visualizer {
   background: $base03;
   font-family: Menlo, Courier, monospace;
   box-shadow: rgba(black, 0.4) 0 0 35px;
+  z-index: 2;
 
   .decompiled {
     .op .opcode {

@@ -1,0 +1,27 @@
+.success-badge {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: green;
+
+  &::before, &::after {
+    content: '';
+    position: absolute;
+    height: 2px;
+    background: #fff;
+  }
+
+  &::before {
+    top: 9px;
+    left: 6px;
+    width: 11px;
+    transform: rotate(-45deg);
+  }
+
+  &::after {
+    top: 11px;
+    left: 4px;
+    width: 5px;
+    transform: rotate(45deg);
+  }
+} 

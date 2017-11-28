@@ -1,0 +1,87 @@
+.share-overlay {
+  .label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #777;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .field {
+    position: relative;
+    display: flex;
+    align-items: end;
+    margin-bottom: 35px;
+
+    p {
+      margin: 0 25px 0 0;
+      font-size: 16px;
+      line-height: 130%;
+    }
+
+    code {
+      color: $orange;
+      border-radius: 3px;
+      padding: 2px 4px;
+      background: #eee;
+    }
+
+    input {
+      flex-grow: 1;
+      margin-right: 25px;
+      border: none;
+      border-bottom: 1px solid #ccc;
+      padding: 0 0 0.5rem 0;
+      @include monospace;
+      font-size: 0.9rem;
+      background: transparent;
+
+      &:focus {
+        outline: none;
+        border-bottom-color: #333;
+      }
+    }
+
+    .button {
+      flex-basis: 150px;
+      flex-shrink: 0;
+      background: $blue;
+    }
+
+    .success-badge {
+      position: absolute;
+      right: -25px;
+      bottom: 3px;
+    }
+  }
+}
+
+.download-zip-instructions {
+  position: relative;
+  padding-left: 40px;
+
+  svg {
+    position: absolute;
+    top: 3px; 
+    left: 0;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  .share-overlay .field {
+    flex-wrap: wrap;
+
+    input {
+      min-width: 100%;
+      margin-bottom: 0.5rem;
+    }
+
+    .button {
+      min-width: 100%;
+    }
+
+    p {
+      margin-bottom: 0.5rem;
+    }
+  }
+}
