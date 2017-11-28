@@ -1,0 +1,80 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0,0,0, 0.3);
+  z-index: z('overlay');
+}
+
+.overlay-window {
+  overflow: auto;
+  position: relative;
+  max-height: 100%;
+  max-width: $overlay-window-max-width;
+  margin: 0 auto;
+  border-radius: $overlay-border-radius;
+  color: #111;
+  background: #fff;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.3), 0 20px 55px -8px rgba(0, 0, 0, 0.45);
+  -webkit-overflow-scrolling: touch;
+}
+
+#overlay-title {
+  outline: none;
+}
+
+.overlay-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: none;
+  padding: 20px 20px 5px 5px;
+  background: transparent;
+  cursor: pointer;
+
+  div {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255, 0.8);
+
+    &:before, &:after {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 15px;
+      bottom: 5px;
+      width: 2px;
+      background: #222;
+    }
+
+    &:before { transform: rotate(45deg); }
+    &:after  { transform: rotate(-45deg); }
+  }
+}
+
+@media only screen and (max-width: $overlay-window-max-width) {
+  .overlay {
+    padding: 8px;
+  }
+
+  #overlay-title {
+    margin-top: 0.5rem;
+    margin-bottom: 2rem;
+    font-size: 27px;
+  }
+}
+
+@media only screen and (min-width: $overlay-window-max-width) {
+  .overlay {
+    padding: 25px;
+  }
+
+  #overlay-title {
+    margin-bottom: 3rem;
+    font-size: 34px;
+  }
+}

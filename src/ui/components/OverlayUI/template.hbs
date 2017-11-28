@@ -1,0 +1,11 @@
+<div class="overlay animation-fade-in {{@rootClass}}" role="dialog" aria-labelledby="overlay-title">
+  <div class="overlay-window">
+    <h1 id="overlay-title" tabindex="0">{{@title}}</h1>
+
+    <button class="overlay-close" onclick={{action @hide}} aria-label="close" title="close">
+      <div aria-hidden="true"></div>
+    </button>
+
+    {{yield}}
+  </div>
+</div>

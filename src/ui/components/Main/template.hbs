@@ -3,8 +3,15 @@
     <div class="pane editor">
       <header class="header">
         <div class="editor-actions">
-          <Button @onClick={{action createNewComponent}} @title="Add Component" />
-          <Button @onClick={{action createNewHelper}} @title="Add Helper" />
+          <button class="button" onclick={{action createNewComponent}}>
+            Add Component
+          </button>
+          <button class="button" onclick={{action createNewHelper}}>
+            Add Helper
+          </button>
+          <button class="button" onclick={{action showShare}}>
+            Share
+          </button>
         </div>
         <span class="glimmerjs-com">
           <a href="https://glimmerjs.com" class="logo" title="glimmerjs.com"></a>
@@ -44,7 +51,9 @@
             </div>
           {{else}}
             <div class="file add-implementation">
-              <Button @onClick={{action addComponentImplementation component}} @title="Add TypeScript" />
+              <button class="button" onclick={{action addComponentImplementation component}}>
+                Add TypeScript
+              </button>
             </div>
           {{/if}}
         </div>
@@ -93,5 +102,13 @@
     </div>
     <div class="pane vm">
     </div>
+  {{/if}}
+
+  {{#if shareIsVisible}}
+    <OverlayKeyBindings @hide={{action hideShare}} as |hide|>
+      <OverlayUI @title="Share Project" @hide={{action hide}} @rootClass="share-overlay">
+        <Share @download={{action download}} @loading={{jsZipIsLoading}} />
+      </OverlayUI>
+    </OverlayKeyBindings>
   {{/if}}
 </glimmer-repl>

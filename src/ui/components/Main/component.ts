@@ -1,7 +1,9 @@
 import Component, { tracked } from "@glimmer/component";
 import FileSystem, { File } from "../../../utils/file-system";
+import JSZip from "jszip";
 import SolarizedTheme from "../../../utils/monaco/themes/solarized-dark";
 import { debounce } from "decko";
+import { saveAs } from "file-saver";
 
 declare function vsRequire(deps: string[], cb: any);
 declare var typings;
@@ -71,7 +73,7 @@ const DEFAULT_APP = {
     name: 'GlimmerApp',
     template: {
       fileName: pathForTemplate('GlimmerApp'),
-      sourceText: `<h1>Welcome to Glimmer!</h1>
+      sourceText: `<h1>Welcome to the Glimmer Playground!</h1>
 <p>You have clicked the button {{count}} times.</p>
 <button onclick={{action increment}}>Click</button>`
     },
@@ -92,6 +94,9 @@ export default class GlimmerRepl extends Component {
   @tracked components: ComponentFiles[] = [];
   @tracked helpers: HelperFiles[] = [];
   @tracked isLoaded = false;
+  @tracked shareIsVisible = false;
+  @tracked shareTrigger = null;
+  @tracked jsZipIsLoading = false;
 
   fs = new FileSystem();
   lastUnknownComponent = null;
@@ -240,6 +245,56 @@ export default class extends Component {
   toggleVisualizer() {
     this.isVisualizerShowing = !this.isVisualizerShowing;
   }
+
+  hideShare() {
+    this.shareIsVisible = false;
+
+    if(this.shareTrigger) {
+      this.shareTrigger.focus();
+    }
+
+    this.shareTrigger = null;
+  }
+
+  showShare(event) {
+    this.shareTrigger = event.target;
+    this.shareIsVisible = true;
+  }
+
+  download() {
+    this.jsZipIsLoading = true;
+
+    loadJSZip().then((JSZip) => {
+      this.jsZipIsLoading = false;
+      let zip = new JSZip();
+      let prefix = 'glimmer-app/';
+
+      this.components.forEach(function(file) {
+        if(file.component) {
+          zip.file(
+            prefix + pathForComponent(file.name),
+            file.component.sourceText
+          );
+        }
+
+        zip.file(
+          prefix + pathForTemplate(file.name),
+          file.template.sourceText
+        );
+      });
+
+      this.helpers.forEach(function(file) {
+        zip.file(
+          prefix + pathForHelper(file.name),
+          file.helper.sourceText
+        );
+      });
+
+      zip.generateAsync({type:'blob'}).then(function(content) {
+        saveAs(content, 'glimmer-playground.zip');
+      });
+    });
+  }
 }
 
 function pathForTemplate(name) {
@@ -259,6 +314,16 @@ function waitForDependencies() {
     vsRequire(['vs/editor/editor.main', 'vs/language/typescript/lib/typescriptServices'], () => {
       initializeTypeScript();
       resolve();
+    });
+  });
+}
+
+const JSZIP_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js';
+
+function loadJSZip(): Promise<JSZip> {
+  return new Promise((resolve, reject) => {
+    vsRequire([JSZIP_URL], (script) => {
+      resolve(script);
     });
   });
 }
