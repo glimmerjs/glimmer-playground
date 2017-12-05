@@ -3,10 +3,10 @@ button.remove {
   display: inline-block;
   width: 18px;
   height: 18px;
+  margin: 0;
   border: 0;
   border-radius: 50%;
   background-color: transparent;
-  margin: 0;
 
   &:before, &:after {
     position: absolute;
@@ -33,20 +33,5 @@ button.remove {
     &:before, &:after {
       background: #fff;
     }
-  }
-}
-
-button.confirm {
-  position: relative;
-  border: 0;
-  padding: 0;
-  color: #fff;
-  font-size: 0.7rem;
-  @include monospace;
-  cursor: pointer;
-  background: transparent;
-
-  &.yes {
-    color: $red;
   }
 }

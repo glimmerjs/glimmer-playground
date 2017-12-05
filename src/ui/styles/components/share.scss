@@ -1,0 +1,106 @@
+.share-overlay {
+  .label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #222;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .field {
+    position: relative;
+    display: flex;
+    align-items: end;
+    margin-bottom: 35px;
+
+    p {
+      margin: 0 25px 0 0;
+      font-size: 16px;
+      line-height: 130%;
+    }
+
+    kbd {
+      color: $orange;
+      border-radius: 3px;
+      padding: 2px 4px;
+      background: #eee;
+    }
+
+    input {
+      flex-grow: 1;
+      margin-right: 25px;
+      border: none;
+      border-bottom: 1px solid #ccc;
+      padding: 0 0 0.5rem 0;
+      @include monospace;
+      font-size: 0.9rem;
+      background: transparent;
+
+      &:focus {
+        outline: none;
+        border-bottom-color: #333;
+      }
+    }
+
+    .button {
+      flex-basis: 170px;
+      flex-shrink: 0;
+      padding-top: 0.4rem;
+      padding-bottom: 0.4rem;
+      font-size: 0.8rem;
+      background: $blue;
+    }
+
+    .success-badge {
+      position: absolute;
+      right: -27px;
+      bottom: calc(50% - 12px);
+    }
+  }
+}
+
+.download-zip-instructions {
+  position: relative;
+  padding-left: 40px;
+
+  svg {
+    position: absolute;
+    top: 3px; 
+    left: 0;
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  .share-overlay .field {
+    flex-wrap: wrap;
+
+    input {
+      min-width: 100%;
+      margin-bottom: 0.5rem;
+    }
+
+    .button {
+      min-width: 100%;
+    }
+
+    p {
+      margin-bottom: 0.5rem;
+    }
+  }
+}
+
+@media only screen and (max-width: $overlay-window-max-width) {
+  .share-overlay .overlay-window {
+    padding: $overlay-top-padding-mobile $overlay-side-padding-mobile;
+  }
+}
+
+@media only screen and (min-width: $overlay-window-max-width) {
+  .share-overlay .overlay-window {
+    padding: $overlay-top-padding-desktop $overlay-side-padding-desktop;
+
+    .success-badge {
+      right: -34px;
+    }
+  }
+}

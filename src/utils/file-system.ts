@@ -4,7 +4,7 @@ import ResolutionMap from "./resolution-map";
 
 const DEFAULT_TEMPLATE = `
 <div>
-  <h1>Welcome to Glimmer!</h1>
+  <h1>Welcome to the Glimmer Playground!</h1>
   <p>You have clicked the button {{count}} times.</p>
   <button onclick={{action increment}}>Click</button>
 </div>
