@@ -31,7 +31,7 @@ glimmer-repl {
       min-height: 100vh;
     }
 
-    padding: 23px 32px 32px 32px;
+    padding: 26px 32px 32px 32px;
   }
 
   .editor {
@@ -42,15 +42,22 @@ glimmer-repl {
     @include solarized-dark;
   }
 
-  h2.component-name, h2.helper-name {
+  .component:first-of-type h1.component-name {
+    border-top: none;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  h1.component-name, h1.helper-name {
     position: relative;
     display: flex;
     align-items: center;
     margin: 0;
-    padding: 6px 15px;
+    border-top: 1px solid $horizonal-rule-color;
+    padding: 6px 15px 9px 15px;
+    color: $blue;
     font-weight: normal;
     font-size: 1.2rem;
-    color: $blue;
     @include monospace;
 
     > .bracket {
@@ -65,10 +72,33 @@ glimmer-repl {
     button.confirm {
       margin-left: 15px;
     }
-  }
 
-  .component:first-of-type h2.component-name {
-    padding-top: 15px;
+    .toggle {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 30px;
+      cursor: pointer;
+
+      &:after {
+        position: absolute;
+        top: calc(50% - 3px);
+        right: 15px;
+        content: '';
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid $base00;
+        transition: all 0.2s;
+      }
+
+      &.hidden:after {
+        right: 15px;
+        transform: rotate(90deg);
+      }
+    }
   }
 
   @include desktop {
@@ -77,10 +107,16 @@ glimmer-repl {
     }
   }
 
+  @include mobile {
+    .file {
+      padding-left: 4px;
+    }
+  }
+
   .file-name {
     display: flex;
     align-items: center;
-    min-height: 24px;
+    min-height: 25px;
     font-weight: normal;
     font-size: 0.8rem;
     margin: 0 17px 15px 27px;
@@ -101,11 +137,6 @@ glimmer-repl {
     .button {
       margin-left: 27px;
     }
-  }
-
-
-  .title {
-    text-align: center;
   }
 
   .toggle-visualizer {
