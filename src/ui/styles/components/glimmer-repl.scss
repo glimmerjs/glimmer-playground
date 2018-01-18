@@ -80,6 +80,8 @@ glimmer-repl {
       bottom: 0;
       width: 30px;
       cursor: pointer;
+      -webkit-user-select: none;
+      user-select: none;
 
       &:after {
         position: absolute;
