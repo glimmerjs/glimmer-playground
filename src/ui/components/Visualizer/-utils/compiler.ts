@@ -1,5 +1,5 @@
-import { BundleCompiler, BundleCompilationResult, CompilerDelegate, Specifier, specifierFor } from "@glimmer/bundle-compiler";
-import { ComponentCapabilities, ProgramSymbolTable } from "@glimmer/interfaces";
+import { BundleCompiler, BundleCompilationResult, CompilerDelegate } from "@glimmer/bundle-compiler";
+import { ComponentCapabilities, ProgramSymbolTable, ModuleLocator, Opaque } from "@glimmer/interfaces";
 import { CompilableTemplate, CompileOptions } from "@glimmer/opcode-compiler";
 import { CompilableTemplate as ICompilableTemplate } from "@glimmer/runtime";
 import { SerializedTemplateBlock } from "@glimmer/wire-format";
@@ -14,8 +14,8 @@ export function compile(templates: {}, helpers: {}) {
     let { meta, block } = templates[specifier];
     let source = meta.source;
 
-    let bundleSpec = specifierFor(path, 'default');
-    bundle.add(bundleSpec, source);
+    let locator = { name: 'default', module: path };
+    bundle.add(locator, source);
   }
 
   return bundle.compile();
@@ -30,26 +30,28 @@ const capabilities: ComponentCapabilities = {
   elementHook: true
 };
 
-class VisualizerCompilerDelegate implements CompilerDelegate {
+class VisualizerCompilerDelegate implements CompilerDelegate<Opaque> {
   constructor(private templates: {}, private helpers: {}) {
   }
 
-  hasComponentInScope(componentName: string, referrer: Specifier): boolean {
+  hasComponentInScope(componentName: string, referrer: ModuleLocator): boolean {
     let key = `template:/glimmer-repl/components/${componentName}`;
     return key in this.templates;
   }
 
-  resolveComponentSpecifier(componentName: string, referrer: Specifier): Specifier {
-    return specifierFor(`/glimmer-repl/components/${componentName}`, 'default');
+  resolveComponent(componentName: string, referrer: ModuleLocator): ModuleLocator {
+    return { module: `/glimmer-repl/components/${componentName}`, name: 'default' };
   }
 
-  getComponentCapabilities(specifier: Specifier): ComponentCapabilities {
+  getComponentCapabilities(specifier: ModuleLocator): ComponentCapabilities {
     return capabilities;
   }
-  getComponentLayout(specifier: Specifier, block: SerializedTemplateBlock, options: CompileOptions<Specifier>): ICompilableTemplate<ProgramSymbolTable> {
+
+  getComponentLayout(specifier: ModuleLocator, block: SerializedTemplateBlock, options: CompileOptions<ModuleLocator>): ICompilableTemplate<ProgramSymbolTable> {
     return CompilableTemplate.topLevel(block, options);
   }
-  hasHelperInScope(helperName: string, referrer: Specifier): boolean {
+
+  hasHelperInScope(helperName: string, referrer: ModuleLocator): boolean {
     if (helperName === 'action' || helperName === 'if') {
       return true;
     }
@@ -58,20 +60,23 @@ class VisualizerCompilerDelegate implements CompilerDelegate {
     return key in this.helpers;
   }
 
-  resolveHelperSpecifier(helperName: string, referrer: Specifier): Specifier {
-    return specifierFor(`/glimmer-repl/helpers/${helperName}`, 'default');
+  resolveHelper(helperName: string, referrer: ModuleLocator): ModuleLocator {
+    return { module: `/glimmer-repl/helpers/${helperName}`, name: 'default' };
   }
 
-  hasModifierInScope(modifierName: string, referrer: Specifier): boolean {
+  hasModifierInScope(modifierName: string, referrer: ModuleLocator): boolean {
     throw new Error("Method not implemented.");
   }
-  resolveModifierSpecifier(modifierName: string, referrer: Specifier): Specifier {
+
+  resolveModifier(modifierName: string, referrer: ModuleLocator): ModuleLocator {
     throw new Error("Method not implemented.");
   }
-  hasPartialInScope(partialName: string, referrer: Specifier): boolean {
+
+  hasPartialInScope(partialName: string, referrer: ModuleLocator): boolean {
     throw new Error("Method not implemented.");
   }
-  resolvePartialSpecifier(partialName: string, referrer: Specifier): Specifier {
+
+  resolvePartial(partialName: string, referrer: ModuleLocator): ModuleLocator {
     throw new Error("Method not implemented.");
   }
 }

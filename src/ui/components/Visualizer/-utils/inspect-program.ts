@@ -1,7 +1,7 @@
 import { METADATA, Operand } from "./opcode-metadata";
 import { compile } from "./compiler";
 import { ConstantPool } from "@glimmer/program";
-import { TYPE_MASK, OPERAND_LEN_MASK, ARG_SHIFT } from '@glimmer/encoder';
+import { OpcodeSize } from "@glimmer/encoder";
 
 import { toHex } from '../hex/helper';
 import hexdump from './hexdump';
@@ -48,8 +48,8 @@ function inspectOpcodes(buffer: ArrayBuffer, pool: ConstantPool) {
   let ops = [];
 
   while (pc < bytes.length) {
-    let opcode = bytes[pc] & TYPE_MASK;
-    let size = ((bytes[pc] & OPERAND_LEN_MASK) >> ARG_SHIFT) + 1;
+    let opcode = bytes[pc] & OpcodeSize.TYPE_MASK;
+    let size = ((bytes[pc] & OpcodeSize.OPERAND_LEN_MASK) >> OpcodeSize.ARG_SHIFT) + 1;
 
     let op = METADATA[opcode] || UNKNOWN_OP;
 

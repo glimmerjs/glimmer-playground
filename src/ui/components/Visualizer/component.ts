@@ -1,13 +1,6 @@
 import Component, { tracked } from "@glimmer/component";
-import { BundleCompiler, CompilerDelegate, Specifier, specifierFor } from "@glimmer/bundle-compiler";
-import { ComponentCapabilities, ProgramSymbolTable } from "@glimmer/interfaces";
-import { CompilableTemplate, CompileOptions } from "@glimmer/opcode-compiler";
-import { CompilableTemplate as ICompilableTemplate } from "@glimmer/runtime";
-import { TYPE_MASK, OPERAND_LEN_MASK, ARG_SHIFT } from '@glimmer/encoder';
-import { ConstantPool } from "@glimmer/program";
 
-import FileSystem, { File } from "../../../utils/file-system";
-import ResolutionMap from "../../../utils/resolution-map";
+import FileSystem from "../../../utils/file-system";
 import { inspect } from "./-utils/inspect-program";
 
 export default class Visualizer extends Component {
