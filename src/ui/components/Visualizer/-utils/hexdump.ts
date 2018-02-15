@@ -35,7 +35,7 @@ function _fillUp(value, count, fillWith) {
 export default function hexdump(arrayBuffer, offset = 0, length = arrayBuffer.byteLength) {
   let view = new DataView(arrayBuffer);
 
-  let out = _fillUp("Offset", 8, " ") + "  00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n";
+  let out = _fillUp("Offset", 8, " ") + "  00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n\n";
   let row = "";
   for (let i = 0; i < length; i += 16) {
     row += _fillUp(offset.toString(16).toUpperCase(), 8, "0") + "  ";
