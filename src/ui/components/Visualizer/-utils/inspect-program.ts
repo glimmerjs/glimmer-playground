@@ -30,6 +30,7 @@ export function inspect(map: {}) {
 
   return {
     hexdump: hexdump(heap.buffer),
+    byteLength: heap.buffer.byteLength,
     buffer,
     opcodes,
     pool

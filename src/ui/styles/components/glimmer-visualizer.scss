@@ -48,7 +48,11 @@ glimmer-visualizer {
       font-family: Menlo, Courier, monospace;
     }
   }
-  
+
+  .byte-length {
+    margin: 1em 0;
+  }
+
   .bytecode {
     margin-top: 17px;
 
