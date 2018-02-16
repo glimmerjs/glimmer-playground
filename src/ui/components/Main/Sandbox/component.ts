@@ -1,5 +1,5 @@
 import Component, { tracked } from '@glimmer/component';
-import Application from '@glimmer/application';
+import Application, { DOMBuilder, SyncRenderer, RuntimeCompilerLoader } from '@glimmer/application';
 import { precompile } from '@glimmer/compiler';
 import { ComponentManager } from '@glimmer/component';
 import { debounce } from 'decko';
@@ -54,13 +54,16 @@ export default class GlimmerSandbox extends Component {
 
         super({
           rootName: 'app',
+          builder: new DOMBuilder({ element: document.body, nextSibling: null }),
+          renderer: new SyncRenderer(),
+          loader: new RuntimeCompilerLoader(resolver),
           resolver
         });
 
         this.vmElement = document.createElement('div');
       }
 
-      _render(): void {
+      async _render(): Promise<void> {
         try {
           super._render();
           let _rerender = this['_rerender'];
@@ -71,6 +74,7 @@ export default class GlimmerSandbox extends Component {
             } catch (e) {
               this.reportError(e);
             }
+            return Promise.resolve();
           };
         } catch (e) {
           this.reportError(e);
@@ -81,7 +85,7 @@ export default class GlimmerSandbox extends Component {
         console.error(e);
 
         if (this.env['_transaction']) { this.env['_transaction'] = null; }
-        this['_rerender'] = () => { };
+        this['_rerender'] = () => { return Promise.resolve(); };
 
         component.lastError = e.toString();
 

@@ -305,10 +305,8 @@ OPCODE_METADATA(Op.PushComponentDefinition, {
   stackChange: 1,
 });
 
-OPCODE_METADATA(Op.PushDynamicComponentManager, {
-  name: 'PushDynamicComponentManager',
-  ops: [Serializable('meta')],
-  operands: 1
+OPCODE_METADATA(Op.PushCurriedComponent, {
+  name: 'PushCurriedComponent'
 });
 
 OPCODE_METADATA(Op.PushArgs, {
@@ -322,6 +320,10 @@ OPCODE_METADATA(Op.PrepareArgs, {
   name: 'PrepareArgs',
   ops: [Register('state')],
   skipCheck: true
+});
+
+OPCODE_METADATA(Op.CaptureArgs, {
+  name: 'CaptureArgs'
 });
 
 OPCODE_METADATA(Op.CreateComponent, {
@@ -363,7 +365,21 @@ OPCODE_METADATA(Op.GetComponentLayout, {
 
 OPCODE_METADATA(Op.InvokeComponentLayout, {
   name: 'InvokeComponentLayout',
-  stackChange: -4
+  stackChange: -2
+});
+
+OPCODE_METADATA(Op.PopulateLayout, {
+  name: 'PopulateLayout',
+  ops: [Register('state')],
+  operands: 1,
+  stackChange: -2
+});
+
+OPCODE_METADATA(Op.Main, {
+  name: 'Main',
+  ops: [Register('state')],
+  operands: 1,
+  stackChange: -2
 });
 
 OPCODE_METADATA(Op.BeginComponentTransaction, {
@@ -411,18 +427,22 @@ OPCODE_METADATA(Op.Comment, {
 OPCODE_METADATA(Op.DynamicContent, {
   name: 'DynamicContent',
   ops: [Bool('trusting')],
-  operands: 1,
+  operands: 0,
   stackChange: -1
+});
+
+OPCODE_METADATA(Op.ResolveDynamicComponent, {
+  name: 'ResolveDynamicComponent',
+  ops: [Serializable('meta')],
+  operands: 1
+});
+
+OPCODE_METADATA(Op.PushDynamicComponentInstance, {
+  name: 'PushDynamicComponentInstance'
 });
 
 OPCODE_METADATA(Op.OpenElement, {
   name: 'OpenElement',
-  ops: [Str('tag')],
-  operands: 1
-});
-
-OPCODE_METADATA(Op.OpenElementWithOperations, {
-  name: 'OpenElementWithOperations',
   ops: [Str('tag')],
   operands: 1
 });
