@@ -14,7 +14,7 @@ export default class extends Component {
 
   generateTinyurl() {
     this.tinyUrlFetching = true;
-    let url = "https://glimmer-url-shortener.herokuapp.com/?url=" + this.fullUrl;
+    let url = "https://glimmer-url-shortener-official.herokuapp.com/?url=" + this.fullUrl;
     fetch(url).then((response) => {
       this.tinyUrlFetching = false;
       return response.text();
