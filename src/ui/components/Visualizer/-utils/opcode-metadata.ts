@@ -1,654 +1,1603 @@
-import { Op } from "@glimmer/vm";
-import { Option, Opaque, Opcode } from "@glimmer/interfaces";
-import { RuntimeConstants } from "@glimmer/program";
-import { fillNulls } from "@glimmer/util";
+/* This file is copied from Glimmer VM's @glimmer/debug package, which is not currently published on npm. */
 
-export interface VM {
-  stack: {
-    sp: number,
-    fp: number,
-    peek(count?: number): Opaque;
-  };
+import { Option, Dict } from '@glimmer/interfaces';
+
+const tuple = <T extends string[]>(...args: T) => args;
+
+// TODO: How do these map onto constant and machine types?
+export const OPERAND_TYPES = tuple(
+  'u32',
+  'i32',
+  'handle',
+  'bool',
+  'str',
+  'option-str',
+  'str-array',
+  'array',
+  'unknown',
+  'primitive',
+  'scope',
+  'symbol-table',
+  'register',
+  'meta'
+);
+
+function isOperandType(s: string): s is OperandType {
+  return OPERAND_TYPES.indexOf(s as any) !== -1;
 }
 
-export type OperandSize = 0 | 1 | 2 | 3;
-
-export type DebugStackChangeFunction<State> = (({ opcode, constants, state }: { opcode: Opcode, constants: RuntimeConstants<Opaque>, state: State }) => number);
-export type DebugBeforeFunction = (opcode: Opcode, vm: VM) => Opaque;
-
-export type OperandType =
-    'handle'
-  | 'i32'
-  | 'str'
-  | 'option-str'
-  | 'str-array'
-  | 'array'
-  | 'bool'
-  | 'primitive'
-  | 'table'
-  | 'symbol'
-  | 'block'
-  | 'register'
-  | 'serializable'
-  | 'lazy-constant'
-  ;
+export type OperandType = typeof OPERAND_TYPES[number];
 
 export interface Operand {
   type: OperandType;
   name: string;
 }
 
-function Handle(name: string): Operand {
-  return { type: 'handle', name };
-}
+export type OperandList = ([] | [Operand] | [Operand, Operand] | [Operand, Operand, Operand]) &
+  Operand[];
 
-function I32(name: string): Operand {
-  return { type: 'i32', name };
-}
-
-function Bool(name: string): Operand {
-  return { type: 'bool', name };
-}
-
-function Str(name: string): Operand {
-  return { type: 'str', name };
-}
-
-function OptionStr(name: string): Operand {
-  return { type: 'option-str', name };
-}
-
-function StrArray(name: string): Operand {
-  return { type: 'str-array', name };
-}
-
-function NumArray(name: string): Operand {
-  return { type: 'array', name };
-}
-
-function ScopeSymbol(name: string): Operand {
-  return { type: 'symbol', name };
-}
-
-function ScopeBlock(name: string): Operand {
-  return { type: 'block', name };
-}
-
-function Primitive(name: string): Operand {
-  return { type: 'primitive', name };
-}
-
-function SymbolTable(name: string): Operand {
-  return { type: 'table', name };
-}
-
-function Register(name: string): Operand {
-  return { type: 'register', name };
-}
-
-function Serializable(name: string): Operand {
-  return { type: 'serializable', name };
-}
-
-function LazyConstant(name: string): Operand {
-  return { type: 'lazy-constant', name };
-}
-
-export interface DebugMetadata<State = undefined> {
+export interface NormalizedMetadata {
   name: string;
-  before?: (opcode: Opcode, vm: VM) => State;
-  stackChange?: DebugStackChangeFunction<State> | number;
-  operands?: OperandSize;
-  ops?: Operand[];
-  skipCheck?: true;
+  mnemonic: string;
+  before: null;
+  stackChange: Option<number>;
+  ops: OperandList;
+  operands: number;
+  check: boolean;
+}
+
+export type Stack = [string[], string[]];
+
+export interface RawOperandMetadata {
+  kind: 'machine' | 'syscall';
+  format: RawOperandFormat;
+  skip?: true;
+  operation: string;
+  'operand-stack'?: [string[], string[]];
+  notes?: string;
+}
+
+export type RawOperandFormat = string | string[];
+
+export function normalize(key: string, input: RawOperandMetadata): NormalizedMetadata {
+  let name;
+
+  if (input.format === undefined) {
+    throw new Error(`Missing format in ${JSON.stringify(input)}`);
+  }
+
+  if (Array.isArray(input.format)) {
+    name = input.format[0];
+  } else {
+    name = input.format;
+  }
+
+  let ops: OperandList = Array.isArray(input.format) ? operands(input.format.slice(1)) : [];
+
+  return {
+    name,
+    mnemonic: key,
+    before: null,
+    stackChange: stackChange(input['operand-stack']),
+    ops,
+    operands: ops.length,
+    check: input.skip === true ? false : true,
+  };
+}
+
+function stackChange(stack?: Stack): Option<number> {
+  if (stack === undefined) {
+    return 0;
+  }
+
+  let before = stack[0];
+  let after = stack[1];
+
+  if (hasRest(before) || hasRest(after)) {
+    return null;
+  }
+
+  return after.length - before.length;
+}
+
+function hasRest(input: string[]): boolean {
+  if (!Array.isArray(input)) {
+    throw new Error(`Unexpected stack entry: ${JSON.stringify(input)}`);
+  }
+  return input.some(s => s.slice(-3) === '...');
+}
+
+function operands(input: string[]): OperandList {
+  if (!Array.isArray(input)) {
+    throw new Error(`Expected operands array, got ${JSON.stringify(input)}`);
+  }
+  return input.map(op) as OperandList;
+}
+
+function op(input: string): Operand {
+  let [name, type] = input.split(':');
+
+  if (isOperandType(type)) {
+    return { name, type };
+  } else {
+    throw new Error(`Expected operand, found ${JSON.stringify(input)}`);
+  }
+}
+
+export function normalizeAll(parsed: {
+  machine: Dict<RawOperandMetadata>;
+  syscall: Dict<RawOperandMetadata>;
+}): { machine: Dict<NormalizedMetadata>; syscall: Dict<NormalizedMetadata> } {
+  let machine = normalizeParsed(parsed.machine);
+  let syscall = normalizeParsed(parsed.syscall);
+
+  return { machine, syscall };
+}
+
+export function normalizeParsed(parsed: Dict<RawOperandMetadata>): Dict<NormalizedMetadata> {
+  let out = Object.create(null) as Dict<NormalizedMetadata>;
+
+  for (let key of Object.keys(parsed)) {
+    out[key] = normalize(key, parsed[key]);
+  }
+
+  return out;
+}
+
+export function buildEnum(
+  name: string,
+  parsed: Dict<NormalizedMetadata>,
+  offset: number,
+  max?: number
+): { enumString: string; predicate: string } {
+  let e = [`export const enum ${name} {`];
+
+  let last: number;
+
+  Object.keys(parsed).forEach((key, i) => {
+    e.push(`  ${parsed[key].name} = ${offset + i},`);
+    last = i;
+  });
+
+  e.push(`  Size = ${last! + offset + 1},`);
+  e.push('}');
+
+  let enumString = e.join('\n');
+
+  let predicate;
+
+  if (max) {
+    predicate = strip`
+      export function is${name}(value: number): value is ${name} {
+        return value >= ${offset} && value <= ${max};
+      }
+    `;
+  } else {
+    predicate = strip`
+      export function is${name}(value: number): value is ${name} {
+        return value >= ${offset};
+      }
+    `;
+  }
+
+  return { enumString, predicate };
+}
+
+export function strip(strings: TemplateStringsArray, ...args: unknown[]) {
+  let out = '';
+  for (let i = 0; i < strings.length; i++) {
+    let string = strings[i];
+    let dynamic = args[i] !== undefined ? String(args[i]) : '';
+
+    out += `${string}${dynamic}`;
+  }
+
+  out = out.match(/^\s*?\n?([\s\S]*?)\n?\s*$/)![1];
+
+  let min = Number.MAX_SAFE_INTEGER;
+
+  for (let line of out.split('\n')) {
+    let leading = line.match(/^\s*/)![0].length;
+
+    min = Math.min(min, leading);
+  }
+
+  let stripped = '';
+
+  for (let line of out.split('\n')) {
+    stripped += line.slice(min) + '\n';
+  }
+
+  return stripped;
+}
+
+export const META_KIND = tuple('METADATA', 'MACHINE_METADATA');
+export type META_KIND = (typeof META_KIND)[number];
+
+export function buildSingleMeta(
+  kind: META_KIND,
+  all: Dict<NormalizedMetadata>,
+  key: keyof typeof all
+): string {
+  let e = kind === 'MACHINE_METADATA' ? 'MachineOp' : 'Op';
+  return `${kind}[${e}.${all[key].name}] = ${stringify(all[key], 0)};`;
+}
+
+function stringify(o: unknown, pad: number): string {
+  if (typeof o !== 'object' || o === null) {
+    if (typeof o === 'string') {
+      return `'${o}'`;
+    }
+    return JSON.stringify(o);
+  }
+
+  if (Array.isArray(o)) {
+    return `[${o.map(v => stringify(v, pad)).join(', ')}]`;
+  }
+
+  let out = ['{'];
+
+  for (let key of Object.keys(o)) {
+    out.push(`${' '.repeat(pad + 2)}${key}: ${stringify((o as Dict)[key], pad + 2)},`);
+  }
+
+  out.push(`${' '.repeat(pad)}}`);
+
+  return out.join('\n');
+}
+
+export function buildMetas(kind: META_KIND, all: Dict<NormalizedMetadata>): string {
+  let out = [];
+
+  for (let key of Object.keys(all)) {
+    out.push(buildSingleMeta(kind, all, key));
+  }
+
+  return out.join('\n\n');
+}
+
+import { MachineOp, Op } from '@glimmer/interfaces';
+import { fillNulls } from '@glimmer/util';
+
+export function opcodeMetadata(op: MachineOp | Op, isMachine: 0 | 1): Option<NormalizedMetadata> {
+  let value = isMachine ? MACHINE_METADATA[op] : METADATA[op];
+
+  return value || null;
 }
 
 export interface NormalizedMetadata {
   name: string;
-  before: Option<DebugBeforeFunction>;
-  stackChange: DebugStackChangeFunction<Opaque>;
-  operands: OperandSize;
-  ops: Operand[];
+  mnemonic: string;
+  before: null;
+  stackChange: Option<number>;
+  ops: OperandList;
+  operands: number;
   check: boolean;
 }
 
-export const METADATA: Option<NormalizedMetadata>[] = fillNulls(Op.Size);
-
-export function OPCODE_METADATA<State, Name extends Op = Op>(name: Name, metadata: DebugMetadata<State>): void {
-  if (METADATA[name as number]) {
-    throw new Error('BUG: Appended Opcode Metadata twice');
-  }
-
-  let before: Option<DebugBeforeFunction>;
-  let providedBefore = metadata.before;
-
-  if (typeof providedBefore === 'function') {
-    before = providedBefore;
-  } else {
-    before = null;
-  }
-
-  let stackChange: DebugStackChangeFunction<State>;
-  const providedStackChange = metadata.stackChange;
-
-  if (typeof providedStackChange === 'function') {
-    stackChange = providedStackChange;
-  } else if (typeof providedStackChange === 'number') {
-    stackChange = () => providedStackChange;
-  } else {
-    stackChange = () => 0;
-  }
-
-  let operands = metadata.operands === undefined ? 0 : metadata.operands;
-  let ops = metadata.ops === undefined ? [] : metadata.ops;
-
-  let normalized: NormalizedMetadata = {
-    name: metadata.name,
-    check: metadata.skipCheck ? false : true,
-    ops,
-    before,
-    stackChange,
-    operands
-  };
-
-  METADATA[name as number] = normalized;
-}
-
-/// helpers ///
-
-/// DYNAMIC SCOPE ///
-
-OPCODE_METADATA(Op.BindDynamicScope, {
-  name: 'BindDynamicScope',
-  operands: 1,
-  stackChange({ opcode: { op1: _names }, constants }) {
-    let size = constants.getArray(_names).length;
-
-    return -size;
-  }
-});
-
-OPCODE_METADATA(Op.PushDynamicScope, {
-  name: 'PushDynamicScope'
-});
-
-OPCODE_METADATA(Op.PopDynamicScope, {
-  name: 'PopDynamicScope'
-});
-
-/// VM ///
-
-OPCODE_METADATA(Op.PushSymbolTable, {
-  name: 'PushSymbolTable',
-  ops: [SymbolTable('table')],
-  operands: 1,
-  stackChange: 1
-});
-
-OPCODE_METADATA(Op.PushBlockScope, {
-  name: 'PushBlockScope',
-  stackChange: 1
-});
-
-OPCODE_METADATA(Op.CompileBlock, {
-  name: 'CompileBlock'
-});
-
-OPCODE_METADATA(Op.InvokeVirtual, {
-  name: 'InvokeVirtual',
-  stackChange: -1
-});
-
-OPCODE_METADATA(Op.InvokeStatic, {
-  name: 'InvokeStatic',
-  ops: [Handle('handle')],
-  operands: 1
-});
-
-OPCODE_METADATA(Op.InvokeYield, {
-  name: 'InvokeYield',
-  stackChange: -2
-});
-
-OPCODE_METADATA(Op.Jump, {
-  name: 'Jump',
-  ops: [I32('to')],
-  operands: 1
-});
-
-OPCODE_METADATA(Op.JumpIf, {
-  name: 'JumpIf',
-  ops: [I32('to')],
-  operands: 1,
-  stackChange: -1
-});
-
-OPCODE_METADATA(Op.JumpUnless, {
-  name: 'JumpUnless',
-  ops: [I32('to')],
-  operands: 1,
-  stackChange: -1
-});
-
-OPCODE_METADATA(Op.PushFrame, {
+const METADATA: Option<NormalizedMetadata>[] = fillNulls(Op.Size);
+const MACHINE_METADATA: Option<NormalizedMetadata>[] = fillNulls(MachineOp.Size);
+MACHINE_METADATA[MachineOp.PushFrame] = {
   name: 'PushFrame',
-  stackChange: 2
-});
-
-OPCODE_METADATA(Op.PopFrame, {
-  name: 'PopFrame',
-
-  before(_opcode: Opcode, vm: VM): { sp: number, fp: number } {
-    return { sp: vm.stack.sp, fp: vm.stack.fp };
-  },
-
-  stackChange({ state }: { state: { sp: number, fp: number } }) {
-    return state.fp - state.sp - 1;
-  }
-});
-
-OPCODE_METADATA(Op.Enter, {
-  name: 'Enter',
-  ops: [I32('args')],
-  operands: 1
-});
-
-OPCODE_METADATA(Op.Exit, {
-  name: 'Exit',
-});
-
-OPCODE_METADATA(Op.ToBoolean, {
-  name: 'ToBoolean'
-});
-
-/// PRELUDE & EXIT ///
-
-OPCODE_METADATA(Op.RootScope, {
-  name: 'RootScope',
-  ops: [I32('symbols'), Bool('bindCallerScope')],
-  operands: 2
-});
-
-OPCODE_METADATA(Op.ChildScope, {
-  name: 'ChildScope'
-});
-
-OPCODE_METADATA(Op.PopScope, {
-  name: 'PopScope'
-});
-
-OPCODE_METADATA(Op.Return, {
-  name: 'Return'
-});
-
-OPCODE_METADATA(Op.ReturnTo, {
-  name: 'ReturnTo',
-  ops: [I32('offset')],
-  operands: 1
-});
-
-/// COMPONENTS ///
-
-OPCODE_METADATA(Op.IsComponent, {
-  name: 'IsComponent'
-});
-
-OPCODE_METADATA(Op.CurryComponent, {
-  name: 'CurryComponent',
-  stackChange: -2
-});
-
-OPCODE_METADATA(Op.PushComponentDefinition, {
-  name: 'PushComponentDefinition',
-  ops: [Handle('definition')],
-  operands: 1,
-  stackChange: 1,
-});
-
-OPCODE_METADATA(Op.PushCurriedComponent, {
-  name: 'PushCurriedComponent'
-});
-
-OPCODE_METADATA(Op.PushArgs, {
-  name: 'PushArgs',
-  ops: [StrArray('names'), I32('positionals'), Bool('synthetic')],
-  operands: 3,
-  stackChange: 1
-});
-
-OPCODE_METADATA(Op.PrepareArgs, {
-  name: 'PrepareArgs',
-  ops: [Register('state')],
-  skipCheck: true
-});
-
-OPCODE_METADATA(Op.CaptureArgs, {
-  name: 'CaptureArgs'
-});
-
-OPCODE_METADATA(Op.CreateComponent, {
-  name: 'CreateComponent',
-  ops: [I32('flags'), Register('state')],
-  operands: 2
-});
-
-OPCODE_METADATA(Op.RegisterComponentDestructor, {
-  name: 'RegisterComponentDestructor',
-  ops: [Register('state')],
-  operands: 1
-});
-
-OPCODE_METADATA(Op.PutComponentOperations, {
-  name: 'PutComponentOperations'
-});
-
-OPCODE_METADATA(Op.GetComponentSelf, {
-  name: 'GetComponentSelf',
-  ops: [Register('state')],
-  operands: 1,
-  stackChange: 1
-});
-
-OPCODE_METADATA(Op.GetComponentTagName, {
-  name: 'GetComponentTagName',
-  ops: [Register('state')],
-  operands: 1,
-  stackChange: 1
-});
-
-OPCODE_METADATA(Op.GetComponentLayout, {
-  name: 'GetComponentLayout',
-  ops: [Register('state')],
-  operands: 1,
-  stackChange: 2
-});
-
-OPCODE_METADATA(Op.InvokeComponentLayout, {
-  name: 'InvokeComponentLayout',
-  stackChange: -2
-});
-
-OPCODE_METADATA(Op.PopulateLayout, {
-  name: 'PopulateLayout',
-  ops: [Register('state')],
-  operands: 1,
-  stackChange: -2
-});
-
-OPCODE_METADATA(Op.Main, {
-  name: 'Main',
-  ops: [Register('state')],
-  operands: 1,
-  stackChange: -2
-});
-
-OPCODE_METADATA(Op.BeginComponentTransaction, {
-  name: 'BeginComponentTransaction'
-});
-
-OPCODE_METADATA(Op.CommitComponentTransaction, {
-  name: 'CommitComponentTransaction'
-});
-
-OPCODE_METADATA(Op.DidCreateElement, {
-  name: 'DidCreateElement',
-  ops: [Register('state')],
-  operands: 1
-});
-
-OPCODE_METADATA(Op.DidRenderLayout, {
-  name: 'DidRenderLayout',
-  ops: [Register('state')],
-  operands: 1
-});
-
-/// DEBUGGER ///
-
-OPCODE_METADATA(Op.Debugger, {
-  name: 'Debugger',
-  ops: [StrArray('symbols'), NumArray('evalInfo')],
-  operands: 2
-});
-
-//// DOM ///
-
-OPCODE_METADATA(Op.Text, {
-  name: 'Text',
-  ops: [Str('text')],
-  operands: 1
-});
-
-OPCODE_METADATA(Op.Comment, {
-  name: 'Comment',
-  ops: [Str('comment')],
-  operands: 1
-});
-
-OPCODE_METADATA(Op.DynamicContent, {
-  name: 'DynamicContent',
-  ops: [Bool('trusting')],
+  mnemonic: 'pushf',
+  before: null,
+  stackChange: 2,
+  ops: [],
   operands: 0,
-  stackChange: -1
-});
+  check: true,
+};
 
-OPCODE_METADATA(Op.ResolveDynamicComponent, {
-  name: 'ResolveDynamicComponent',
-  ops: [Serializable('meta')],
-  operands: 1
-});
+MACHINE_METADATA[MachineOp.PopFrame] = {
+  name: 'PopFrame',
+  mnemonic: 'popf',
+  before: null,
+  stackChange: -2,
+  ops: [],
+  operands: 0,
+  check: false,
+};
 
-OPCODE_METADATA(Op.PushDynamicComponentInstance, {
-  name: 'PushDynamicComponentInstance'
-});
+MACHINE_METADATA[MachineOp.InvokeVirtual] = {
+  name: 'InvokeVirtual',
+  mnemonic: 'vcall',
+  before: null,
+  stackChange: -1,
+  ops: [],
+  operands: 0,
+  check: true,
+};
 
-OPCODE_METADATA(Op.OpenElement, {
-  name: 'OpenElement',
-  ops: [Str('tag')],
-  operands: 1
-});
-
-OPCODE_METADATA(Op.OpenDynamicElement, {
-  name: 'OpenDynamicElement',
-  stackChange: -1
-});
-
-OPCODE_METADATA(Op.StaticAttr, {
-  name: 'StaticAttr',
-  ops: [Str('name'), Str('value'), OptionStr('namespace')],
-  operands: 3
-});
-
-OPCODE_METADATA(Op.DynamicAttr, {
-  name: 'DynamicAttr',
-  ops: [Str('name'), Bool('trusting'), OptionStr('namespace')],
-  operands: 3,
-  stackChange: -1
-});
-
-OPCODE_METADATA(Op.ComponentAttr, {
-  name: 'ComponentAttr',
-  ops: [Str('name'), Bool('trusting'), OptionStr('namespace')],
-  operands: 3,
-  stackChange: -1
-});
-
-OPCODE_METADATA(Op.FlushElement, {
-  name: 'FlushElement'
-});
-
-OPCODE_METADATA(Op.CloseElement, {
-  name: 'CloseElement'
-});
-
-/// WORMHOLE ///
-
-OPCODE_METADATA(Op.PushRemoteElement, {
-  name: 'PushRemoteElement',
-  stackChange: -3
-});
-
-OPCODE_METADATA(Op.PopRemoteElement, {
-  name: 'PopRemoteElement'
-});
-
-/// MODIFIER ///
-
-OPCODE_METADATA(Op.Modifier, {
-  name: 'Modifier',
-  ops: [Handle('helper')],
+MACHINE_METADATA[MachineOp.InvokeStatic] = {
+  name: 'InvokeStatic',
+  mnemonic: 'scall',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'offset',
+      type: 'u32',
+    },
+  ],
   operands: 1,
-  stackChange: -1
-});
+  check: true,
+};
 
-/// VM ///
-
-OPCODE_METADATA(Op.Constant, {
-  name: 'Constant',
-  ops: [LazyConstant('value')],
+MACHINE_METADATA[MachineOp.Jump] = {
+  name: 'Jump',
+  mnemonic: 'goto',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'to',
+      type: 'u32',
+    },
+  ],
   operands: 1,
-  stackChange: 1
-});
+  check: true,
+};
 
-OPCODE_METADATA(Op.Primitive, {
-  name: 'Primitive',
-  ops: [Primitive('primitive')],
+MACHINE_METADATA[MachineOp.Return] = {
+  name: 'Return',
+  mnemonic: 'ret',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: false,
+};
+
+MACHINE_METADATA[MachineOp.ReturnTo] = {
+  name: 'ReturnTo',
+  mnemonic: 'setra',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'offset',
+      type: 'i32',
+    },
+  ],
   operands: 1,
-  stackChange: 1
-});
-
-OPCODE_METADATA(Op.PrimitiveReference, {
-  name: 'PrimitiveReference'
-});
-
-OPCODE_METADATA(Op.Dup, {
-  name: 'Dup',
-  ops: [Register('register'), I32('offset')],
-  operands: 2,
-  stackChange: 1
-});
-
-OPCODE_METADATA(Op.Pop, {
-  name: 'Pop',
-  ops: [I32('count')],
-  operands: 1,
-  stackChange({ opcode: { op1: count } }) {
-    return -count;
-  }
-});
-
-OPCODE_METADATA(Op.Load, {
-  name: 'Load',
-  ops: [Register('register')],
-  operands: 1,
-  stackChange: -1
-});
-
-OPCODE_METADATA(Op.Fetch, {
-  name: 'Fetch',
-  ops: [Register('register')],
-  operands: 1,
-  stackChange: 1
-});
-
-/// EXPRESSIONS ///
-
-OPCODE_METADATA(Op.Helper, {
+  check: true,
+};
+METADATA[Op.Helper] = {
   name: 'Helper',
-  ops: [Handle('helper')],
+  mnemonic: 'ncall',
+  before: null,
+  stackChange: null,
+  ops: [
+    {
+      name: 'helper',
+      type: 'handle',
+    },
+  ],
   operands: 1,
-  stackChange: -1
-});
+  check: true,
+};
 
-OPCODE_METADATA(Op.SetVariable, {
+METADATA[Op.SetNamedVariables] = {
+  name: 'SetNamedVariables',
+  mnemonic: 'vsargs',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'register',
+      type: 'u32',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.SetBlocks] = {
+  name: 'SetBlocks',
+  mnemonic: 'vbblocks',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'register',
+      type: 'u32',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.SetVariable] = {
   name: 'SetVariable',
-  ops: [ScopeSymbol('symbol')],
+  mnemonic: 'sbvar',
+  before: null,
+  stackChange: -1,
+  ops: [
+    {
+      name: 'symbol',
+      type: 'u32',
+    },
+  ],
   operands: 1,
-  stackChange: -1
-});
+  check: true,
+};
 
-OPCODE_METADATA(Op.SetBlock, {
-  name: 'SetBlock',
-  ops: [ScopeSymbol('symbol')],
+METADATA[Op.SetAotBlock] = {
+  name: 'SetAotBlock',
+  mnemonic: 'sbblock',
+  before: null,
+  stackChange: -3,
+  ops: [
+    {
+      name: 'symbol',
+      type: 'u32',
+    },
+  ],
   operands: 1,
-  stackChange: -3
-});
+  check: true,
+};
 
-OPCODE_METADATA(Op.GetVariable, {
+METADATA[Op.SetJitBlock] = {
+  name: 'SetJitBlock',
+  mnemonic: 'sjblock',
+  before: null,
+  stackChange: -3,
+  ops: [
+    {
+      name: 'symbol',
+      type: 'u32',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.GetVariable] = {
   name: 'GetVariable',
-  ops: [ScopeSymbol('symbol')],
+  mnemonic: 'symload',
+  before: null,
+  stackChange: 1,
+  ops: [
+    {
+      name: 'symbol',
+      type: 'u32',
+    },
+  ],
   operands: 1,
-  stackChange: 1
-});
+  check: true,
+};
 
-OPCODE_METADATA(Op.GetProperty, {
+METADATA[Op.GetProperty] = {
   name: 'GetProperty',
-  ops: [Str('key')],
-  operands: 1
-});
+  mnemonic: 'getprop',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'property',
+      type: 'str',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
 
-OPCODE_METADATA(Op.GetBlock, {
+METADATA[Op.GetBlock] = {
   name: 'GetBlock',
-  ops: [ScopeBlock('block')],
+  mnemonic: 'blockload',
+  before: null,
+  stackChange: 3,
+  ops: [
+    {
+      name: 'block',
+      type: 'u32',
+    },
+  ],
   operands: 1,
-  stackChange: 3
-});
+  check: true,
+};
 
-OPCODE_METADATA(Op.HasBlock, {
+METADATA[Op.HasBlock] = {
   name: 'HasBlock',
-  ops: [ScopeBlock('block')],
+  mnemonic: 'hasblockload',
+  before: null,
+  stackChange: 1,
+  ops: [
+    {
+      name: 'block',
+      type: 'u32',
+    },
+  ],
   operands: 1,
-  stackChange: 1
-});
+  check: true,
+};
 
-OPCODE_METADATA(Op.HasBlockParams, {
+METADATA[Op.HasBlockParams] = {
   name: 'HasBlockParams',
-  ops: [ScopeBlock('block')],
-  stackChange: -2
-});
+  mnemonic: 'hasparamsload',
+  before: null,
+  stackChange: -2,
+  ops: [
+    {
+      name: 'block',
+      type: 'u32',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
 
-OPCODE_METADATA(Op.Concat, {
+METADATA[Op.Concat] = {
   name: 'Concat',
-  ops: [I32('size')],
+  mnemonic: 'concat',
+  before: null,
+  stackChange: null,
+  ops: [
+    {
+      name: 'count',
+      type: 'u32',
+    },
+  ],
   operands: 1,
+  check: true,
+};
 
-  stackChange({ opcode }) {
-    return -opcode.op1 + 1;
-  }
-});
+METADATA[Op.Constant] = {
+  name: 'Constant',
+  mnemonic: 'rconstload',
+  before: null,
+  stackChange: 1,
+  ops: [
+    {
+      name: 'constant',
+      type: 'unknown',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
 
-/// LIST ///
+METADATA[Op.Primitive] = {
+  name: 'Primitive',
+  mnemonic: 'pconstload',
+  before: null,
+  stackChange: 1,
+  ops: [
+    {
+      name: 'constant',
+      type: 'primitive',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
 
-OPCODE_METADATA(Op.EnterList, {
-  name: 'EnterList',
-  ops: [I32('start')],
-  operands: 1
-});
+METADATA[Op.PrimitiveReference] = {
+  name: 'PrimitiveReference',
+  mnemonic: 'ptoref',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
 
-OPCODE_METADATA(Op.ExitList, {
-  name: 'ExitList'
-});
+METADATA[Op.ReifyU32] = {
+  name: 'ReifyU32',
+  mnemonic: 'reifyload',
+  before: null,
+  stackChange: 1,
+  ops: [],
+  operands: 0,
+  check: true,
+};
 
-OPCODE_METADATA(Op.PutIterator, {
-  name: 'PutIterator'
-});
+METADATA[Op.Dup] = {
+  name: 'Dup',
+  mnemonic: 'dup',
+  before: null,
+  stackChange: 1,
+  ops: [
+    {
+      name: 'register',
+      type: 'u32',
+    },
+    {
+      name: 'offset',
+      type: 'u32',
+    },
+  ],
+  operands: 2,
+  check: true,
+};
 
-OPCODE_METADATA(Op.Iterate, {
-  name: 'Iterate',
-  ops: [I32('end')],
-  skipCheck: true
-});
+METADATA[Op.Pop] = {
+  name: 'Pop',
+  mnemonic: 'pop',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'count',
+      type: 'u32',
+    },
+  ],
+  operands: 1,
+  check: false,
+};
 
-/// PARTIAL ///
+METADATA[Op.Load] = {
+  name: 'Load',
+  mnemonic: 'put',
+  before: null,
+  stackChange: -1,
+  ops: [
+    {
+      name: 'register',
+      type: 'u32',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
 
-OPCODE_METADATA(Op.InvokePartial, {
-  name: 'InvokePartial',
-  ops: [Serializable('meta'), StrArray('symbols'), NumArray('evalInfo')],
+METADATA[Op.Fetch] = {
+  name: 'Fetch',
+  mnemonic: 'regload',
+  before: null,
+  stackChange: 1,
+  ops: [
+    {
+      name: 'register',
+      type: 'u32',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.RootScope] = {
+  name: 'RootScope',
+  mnemonic: 'rscopepush',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'symbols',
+      type: 'u32',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.VirtualRootScope] = {
+  name: 'VirtualRootScope',
+  mnemonic: 'vrscopepush',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'register',
+      type: 'u32',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.ChildScope] = {
+  name: 'ChildScope',
+  mnemonic: 'cscopepush',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.PopScope] = {
+  name: 'PopScope',
+  mnemonic: 'scopepop',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.Text] = {
+  name: 'Text',
+  mnemonic: 'apnd_text',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'contents',
+      type: 'str',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.Comment] = {
+  name: 'Comment',
+  mnemonic: 'apnd_comment',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'contents',
+      type: 'str',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.AppendHTML] = {
+  name: 'AppendHTML',
+  mnemonic: 'apnd_dynhtml',
+  before: null,
+  stackChange: -1,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.AppendSafeHTML] = {
+  name: 'AppendSafeHTML',
+  mnemonic: 'apnd_dynshtml',
+  before: null,
+  stackChange: -1,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.AppendDocumentFragment] = {
+  name: 'AppendDocumentFragment',
+  mnemonic: 'apnd_dynfrag',
+  before: null,
+  stackChange: -1,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.AppendNode] = {
+  name: 'AppendNode',
+  mnemonic: 'apnd_dynnode',
+  before: null,
+  stackChange: -1,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.AppendText] = {
+  name: 'AppendText',
+  mnemonic: 'apnd_dyntext',
+  before: null,
+  stackChange: -1,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.OpenElement] = {
+  name: 'OpenElement',
+  mnemonic: 'apnd_tag',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'tag',
+      type: 'str',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.OpenDynamicElement] = {
+  name: 'OpenDynamicElement',
+  mnemonic: 'apnd_dyntag',
+  before: null,
+  stackChange: -1,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.PushRemoteElement] = {
+  name: 'PushRemoteElement',
+  mnemonic: 'apnd_remotetag',
+  before: null,
+  stackChange: -3,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.StaticAttr] = {
+  name: 'StaticAttr',
+  mnemonic: 'apnd_attr',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'name',
+      type: 'str',
+    },
+    {
+      name: 'value',
+      type: 'str',
+    },
+    {
+      name: 'namespace',
+      type: 'option-str',
+    },
+  ],
   operands: 3,
-  stackChange: 1
-});
+  check: true,
+};
 
-OPCODE_METADATA(Op.ResolveMaybeLocal, {
-  name: 'ResolveMaybeLocal',
+METADATA[Op.DynamicAttr] = {
+  name: 'DynamicAttr',
+  mnemonic: 'apnd_dynattr',
+  before: null,
+  stackChange: -1,
+  ops: [
+    {
+      name: 'name',
+      type: 'str',
+    },
+    {
+      name: 'trusting',
+      type: 'bool',
+    },
+    {
+      name: 'namespace',
+      type: 'option-str',
+    },
+  ],
+  operands: 3,
+  check: true,
+};
+
+METADATA[Op.ComponentAttr] = {
+  name: 'ComponentAttr',
+  mnemonic: 'apnd_cattr',
+  before: null,
+  stackChange: -1,
+  ops: [
+    {
+      name: 'name',
+      type: 'str',
+    },
+    {
+      name: 'trusting',
+      type: 'bool',
+    },
+    {
+      name: 'namespace',
+      type: 'option-str',
+    },
+  ],
+  operands: 3,
+  check: true,
+};
+
+METADATA[Op.FlushElement] = {
+  name: 'FlushElement',
+  mnemonic: 'apnd_flushtag',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.CloseElement] = {
+  name: 'CloseElement',
+  mnemonic: 'apnd_closetag',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.PopRemoteElement] = {
+  name: 'PopRemoteElement',
+  mnemonic: 'apnd_closeremotetag',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.Modifier] = {
+  name: 'Modifier',
+  mnemonic: 'apnd_modifier',
+  before: null,
+  stackChange: -1,
+  ops: [
+    {
+      name: 'helper',
+      type: 'handle',
+    },
+  ],
   operands: 1,
-  stackChange: 1
-});
+  check: true,
+};
+
+METADATA[Op.BindDynamicScope] = {
+  name: 'BindDynamicScope',
+  mnemonic: 'setdynscope',
+  before: null,
+  stackChange: null,
+  ops: [
+    {
+      name: 'names',
+      type: 'str-array',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.PushDynamicScope] = {
+  name: 'PushDynamicScope',
+  mnemonic: 'dynscopepush',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.PopDynamicScope] = {
+  name: 'PopDynamicScope',
+  mnemonic: 'dynscopepop',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.CompileBlock] = {
+  name: 'CompileBlock',
+  mnemonic: 'cmpblock',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.PushBlockScope] = {
+  name: 'PushBlockScope',
+  mnemonic: 'scopeload',
+  before: null,
+  stackChange: 1,
+  ops: [
+    {
+      name: 'scope',
+      type: 'scope',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.PushSymbolTable] = {
+  name: 'PushSymbolTable',
+  mnemonic: 'dsymload',
+  before: null,
+  stackChange: 1,
+  ops: [
+    {
+      name: 'table',
+      type: 'symbol-table',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.InvokeYield] = {
+  name: 'InvokeYield',
+  mnemonic: 'invokeyield',
+  before: null,
+  stackChange: null,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.JumpIf] = {
+  name: 'JumpIf',
+  mnemonic: 'iftrue',
+  before: null,
+  stackChange: -1,
+  ops: [
+    {
+      name: 'to',
+      type: 'u32',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.JumpUnless] = {
+  name: 'JumpUnless',
+  mnemonic: 'iffalse',
+  before: null,
+  stackChange: -1,
+  ops: [
+    {
+      name: 'to',
+      type: 'u32',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.JumpEq] = {
+  name: 'JumpEq',
+  mnemonic: 'ifeq',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'to',
+      type: 'i32',
+    },
+    {
+      name: 'comparison',
+      type: 'i32',
+    },
+  ],
+  operands: 2,
+  check: true,
+};
+
+METADATA[Op.AssertSame] = {
+  name: 'AssertSame',
+  mnemonic: 'assert_eq',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.Enter] = {
+  name: 'Enter',
+  mnemonic: 'blk_start',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'args',
+      type: 'u32',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.Exit] = {
+  name: 'Exit',
+  mnemonic: 'blk_end',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.ToBoolean] = {
+  name: 'ToBoolean',
+  mnemonic: 'anytobool',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.EnterList] = {
+  name: 'EnterList',
+  mnemonic: 'list_start',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'address',
+      type: 'u32',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.ExitList] = {
+  name: 'ExitList',
+  mnemonic: 'list_end',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.PutIterator] = {
+  name: 'PutIterator',
+  mnemonic: 'toiter',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.Iterate] = {
+  name: 'Iterate',
+  mnemonic: 'iter',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'end',
+      type: 'u32',
+    },
+  ],
+  operands: 1,
+  check: false,
+};
+
+METADATA[Op.Main] = {
+  name: 'Main',
+  mnemonic: 'main',
+  before: null,
+  stackChange: -2,
+  ops: [
+    {
+      name: 'state',
+      type: 'register',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.IsComponent] = {
+  name: 'IsComponent',
+  mnemonic: 'iscomponent',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.ContentType] = {
+  name: 'ContentType',
+  mnemonic: 'ctload',
+  before: null,
+  stackChange: 1,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.CurryComponent] = {
+  name: 'CurryComponent',
+  mnemonic: 'curry',
+  before: null,
+  stackChange: null,
+  ops: [
+    {
+      name: 'templateMeta',
+      type: 'meta',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.PushComponentDefinition] = {
+  name: 'PushComponentDefinition',
+  mnemonic: 'cmload',
+  before: null,
+  stackChange: 1,
+  ops: [
+    {
+      name: 'spec',
+      type: 'handle',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.PushDynamicComponentInstance] = {
+  name: 'PushDynamicComponentInstance',
+  mnemonic: 'dciload',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.PushCurriedComponent] = {
+  name: 'PushCurriedComponent',
+  mnemonic: 'curriedload',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.ResolveDynamicComponent] = {
+  name: 'ResolveDynamicComponent',
+  mnemonic: 'cdload',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'templateMeta',
+      type: 'meta',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.PushArgs] = {
+  name: 'PushArgs',
+  mnemonic: 'argsload',
+  before: null,
+  stackChange: null,
+  ops: [
+    {
+      name: 'names',
+      type: 'str-array',
+    },
+    {
+      name: 'positionalCount',
+      type: 'u32',
+    },
+    {
+      name: 'synthetic',
+      type: 'bool',
+    },
+  ],
+  operands: 3,
+  check: true,
+};
+
+METADATA[Op.PushEmptyArgs] = {
+  name: 'PushEmptyArgs',
+  mnemonic: 'emptyargsload',
+  before: null,
+  stackChange: 1,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.PopArgs] = {
+  name: 'PopArgs',
+  mnemonic: 'argspop',
+  before: null,
+  stackChange: null,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.PrepareArgs] = {
+  name: 'PrepareArgs',
+  mnemonic: 'argsprep',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'state',
+      type: 'register',
+    },
+  ],
+  operands: 1,
+  check: false,
+};
+
+METADATA[Op.CaptureArgs] = {
+  name: 'CaptureArgs',
+  mnemonic: 'argscapture',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.CreateComponent] = {
+  name: 'CreateComponent',
+  mnemonic: 'comp_create',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'flags',
+      type: 'u32',
+    },
+    {
+      name: 'state',
+      type: 'register',
+    },
+  ],
+  operands: 2,
+  check: true,
+};
+
+METADATA[Op.RegisterComponentDestructor] = {
+  name: 'RegisterComponentDestructor',
+  mnemonic: 'comp_dest',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'state',
+      type: 'register',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.PutComponentOperations] = {
+  name: 'PutComponentOperations',
+  mnemonic: 'comp_elops',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.GetComponentSelf] = {
+  name: 'GetComponentSelf',
+  mnemonic: 'comp_selfload',
+  before: null,
+  stackChange: 1,
+  ops: [
+    {
+      name: 'state',
+      type: 'register',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.GetComponentTagName] = {
+  name: 'GetComponentTagName',
+  mnemonic: 'comp_tagload',
+  before: null,
+  stackChange: 1,
+  ops: [
+    {
+      name: 'state',
+      type: 'register',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.GetAotComponentLayout] = {
+  name: 'GetAotComponentLayout',
+  mnemonic: 'comp_alayoutload',
+  before: null,
+  stackChange: 2,
+  ops: [
+    {
+      name: 'state',
+      type: 'register',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.GetJitComponentLayout] = {
+  name: 'GetJitComponentLayout',
+  mnemonic: 'comp_jlayoutload',
+  before: null,
+  stackChange: 2,
+  ops: [
+    {
+      name: 'state',
+      type: 'register',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.BindEvalScope] = {
+  name: 'BindEvalScope',
+  mnemonic: 'eval_scope',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'state',
+      type: 'register',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.SetupForEval] = {
+  name: 'SetupForEval',
+  mnemonic: 'eval_setup',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'state',
+      type: 'register',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.PopulateLayout] = {
+  name: 'PopulateLayout',
+  mnemonic: 'comp_layoutput',
+  before: null,
+  stackChange: -2,
+  ops: [
+    {
+      name: 'state',
+      type: 'register',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.InvokeComponentLayout] = {
+  name: 'InvokeComponentLayout',
+  mnemonic: 'comp_invokelayout',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'state',
+      type: 'register',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.BeginComponentTransaction] = {
+  name: 'BeginComponentTransaction',
+  mnemonic: 'comp_begin',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.CommitComponentTransaction] = {
+  name: 'CommitComponentTransaction',
+  mnemonic: 'comp_commit',
+  before: null,
+  stackChange: 0,
+  ops: [],
+  operands: 0,
+  check: true,
+};
+
+METADATA[Op.DidCreateElement] = {
+  name: 'DidCreateElement',
+  mnemonic: 'comp_created',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'state',
+      type: 'register',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.DidRenderLayout] = {
+  name: 'DidRenderLayout',
+  mnemonic: 'comp_rendered',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'state',
+      type: 'register',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.InvokePartial] = {
+  name: 'InvokePartial',
+  mnemonic: 'invokepartial',
+  before: null,
+  stackChange: 1,
+  ops: [
+    {
+      name: 'templateMeta',
+      type: 'meta',
+    },
+    {
+      name: 'symbols',
+      type: 'str-array',
+    },
+    {
+      name: 'evalInfo',
+      type: 'array',
+    },
+  ],
+  operands: 3,
+  check: true,
+};
+
+METADATA[Op.ResolveMaybeLocal] = {
+  name: 'ResolveMaybeLocal',
+  mnemonic: 'eval_varload',
+  before: null,
+  stackChange: 1,
+  ops: [
+    {
+      name: 'local',
+      type: 'str',
+    },
+  ],
+  operands: 1,
+  check: true,
+};
+
+METADATA[Op.Debugger] = {
+  name: 'Debugger',
+  mnemonic: 'debugger',
+  before: null,
+  stackChange: 0,
+  ops: [
+    {
+      name: 'symbols',
+      type: 'str-array',
+    },
+    {
+      name: 'evalInfo',
+      type: 'array',
+    },
+  ],
+  operands: 2,
+  check: true,
+};

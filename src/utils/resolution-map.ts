@@ -46,10 +46,15 @@ let packages = {
   '@glimmer/component': GlimmerComponent
 };
 
+const requireSym = Symbol()
+
 function evalTypeScript(source: string) {
   let require = function(pkgName) {
-    return packages[pkgName];
+    return pkgName && packages[pkgName];
   };
+  // Required to prevent Rollup from removing the require function, as it is only
+  // invoked inside the eval.
+  window[requireSym] = require;
 
   let tsExports = eval(`(function(exports) { ${source}; return exports; })({})`);
 
