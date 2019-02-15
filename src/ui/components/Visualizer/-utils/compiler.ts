@@ -1,7 +1,7 @@
+import { CAPABILITIES } from "@glimmer/component";
 import { BundleCompiler, BundleCompilationResult, CompilerDelegate } from "@glimmer/bundle-compiler";
-import { ComponentCapabilities, ProgramSymbolTable, ModuleLocator, Opaque } from "@glimmer/interfaces";
+import { ComponentCapabilities, ProgramSymbolTable, ModuleLocator } from "@glimmer/interfaces";
 import { CompilableTemplate, CompileOptions } from "@glimmer/opcode-compiler";
-import { CompilableTemplate as ICompilableTemplate } from "@glimmer/runtime";
 import { SerializedTemplateBlock } from "@glimmer/wire-format";
 
 export function compile(templates: {}, helpers: {}) {
@@ -15,22 +15,14 @@ export function compile(templates: {}, helpers: {}) {
     let source = meta.source;
 
     let locator = { name: 'default', module: path };
-    bundle.add(locator, source);
+    bundle.addTemplateSource(locator, source);
   }
 
   return bundle.compile();
 }
 
-const capabilities: ComponentCapabilities = {
-  dynamicLayout: false,
-  dynamicTag: true,
-  prepareArgs: false,
-  createArgs: true,
-  attributeHook: true,
-  elementHook: true
-};
 
-class VisualizerCompilerDelegate implements CompilerDelegate<Opaque> {
+class VisualizerCompilerDelegate implements CompilerDelegate<unknown> {
   constructor(private templates: {}, private helpers: {}) {
   }
 
@@ -44,11 +36,7 @@ class VisualizerCompilerDelegate implements CompilerDelegate<Opaque> {
   }
 
   getComponentCapabilities(specifier: ModuleLocator): ComponentCapabilities {
-    return capabilities;
-  }
-
-  getComponentLayout(specifier: ModuleLocator, block: SerializedTemplateBlock, options: CompileOptions<ModuleLocator>): ICompilableTemplate<ProgramSymbolTable> {
-    return CompilableTemplate.topLevel(block, options);
+    return CAPABILITIES;
   }
 
   hasHelperInScope(helperName: string, referrer: ModuleLocator): boolean {

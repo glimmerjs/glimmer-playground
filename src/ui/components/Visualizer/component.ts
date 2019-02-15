@@ -8,7 +8,7 @@ export default class Visualizer extends Component {
     fs: FileSystem
   };
 
-  @tracked('args')
+  @tracked
   get compilation() {
     let { fs } = this.args;
 

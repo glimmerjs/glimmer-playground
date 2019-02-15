@@ -1,10 +1,11 @@
-import { METADATA, Operand } from "./opcode-metadata";
+import { opcodeMetadata, Operand } from "./opcode-metadata";
 import { compile } from "./compiler";
-import { ConstantPool } from "@glimmer/program";
 import { OpcodeSize } from "@glimmer/encoder";
+import { hydrateProgram } from "@glimmer/program";
 
 import { toHex } from '../hex/helper';
 import hexdump from './hexdump';
+import { CompilerArtifacts, ConstantPool } from "@glimmer/interfaces";
 
 export function inspect(map: {}) {
   let templates = {};
@@ -21,19 +22,19 @@ export function inspect(map: {}) {
     }
   }
 
-  let { heap, pool } = compile(templates, helpers);
+  let { heap, pool: constants } = compile(templates, helpers);
 
   let buffer = Array.from(new Uint8Array(heap.buffer))
     .map(n => toHex(n));
 
-  let opcodes = inspectOpcodes(heap.buffer, pool);
+  let opcodes = inspectOpcodes({ heap, constants });
 
   return {
     hexdump: hexdump(heap.buffer),
     byteLength: heap.buffer.byteLength,
     buffer,
     opcodes,
-    pool
+    constants
   };
 }
 
@@ -43,29 +44,42 @@ const UNKNOWN_OP = {
   ops: []
 };
 
-function inspectOpcodes(buffer: ArrayBuffer, pool: ConstantPool) {
-  let bytes = new Uint16Array(buffer);
+function inspectOpcodes(artifacts: CompilerArtifacts) {
+  let program = hydrateProgram(artifacts);
+
   let pc = 0;
   let ops = [];
+  let opcode = program.opcode(pc);
+  let size = artifacts.heap.buffer.byteLength / 4;
 
-  while (pc < bytes.length) {
-    let opcode = bytes[pc] & OpcodeSize.TYPE_MASK;
-    let size = ((bytes[pc] & OpcodeSize.OPERAND_LEN_MASK) >> OpcodeSize.ARG_SHIFT) + 1;
-
-    let op = METADATA[opcode] || UNKNOWN_OP;
+  while (pc < size) {
+    let op = opcodeMetadata(opcode.type, opcode.isMachine) || UNKNOWN_OP;
 
     let operands = op.ops.map((operand, offset) => {
-      let val = bytes[pc + offset + 1];
-      return operandFor(operand, val, pool);
+      let val: number;
+      switch (offset) {
+        case 0:
+          val = opcode.op1;
+          break;
+        case 1:
+          val = opcode.op2;
+          break;
+        case 3:
+          val = opcode.op3;
+          break;
+      }
+
+      return operandFor(operand, val, artifacts.constants);
     });
 
     ops.push({
       name: op.name,
-      opcode,
+      opcode: opcode.type,
       operands
     });
 
-    pc += size;
+    pc += opcode.size
+    opcode = program.opcode(pc);
   }
 
   return ops;

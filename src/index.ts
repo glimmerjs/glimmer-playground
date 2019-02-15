@@ -1,6 +1,6 @@
 import App from './main';
-import Application from '@glimmer/application';
-import { ComponentManager, setPropertyDidChange } from '@glimmer/component';
+import { ComponentManager } from '@glimmer/component';
+import { setPropertyDidChange } from '@glimmer/tracking';
 import { apps } from './ui/components/Main/Sandbox/component';
 
 const app = new App();
