@@ -706,13 +706,13 @@
     silent-error "^1.1.0"
     walk-sync "^0.3.1"
 
-"@glimmer/application@^0.14.0-alpha.2":
-  version "0.14.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@glimmer/application/-/application-0.14.0-alpha.2.tgz#896e1fe26be067aa082676f81bccf75ee04daf47"
-  integrity sha512-2SAuNNMPp1pl1QYfiY4uJcaF3BpYZv+Q6iqPgAE98U0bu2wZ5S7HAtPopcLgE5ura0itDwnFuwlw7mrvI1XMGg==
+"@glimmer/application@^0.14.0-alpha.3":
+  version "0.14.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/@glimmer/application/-/application-0.14.0-alpha.3.tgz#36a1d348711f7b3b56201f62f6fdb20bc10673dc"
+  integrity sha512-FDc4jvAOVHqQQzMVCR+p79rjHHFg0RCVJB/V276aJgGm/Ff5Vwa9L9jEODnNZ6+0a+kvwo6m57LfgnFnkt7OSg==
   dependencies:
     "@glimmer/compiler" "^0.39.1"
-    "@glimmer/component" "^0.14.0-alpha.2"
+    "@glimmer/component" "^0.14.0-alpha.3"
     "@glimmer/di" "^0.1.9"
     "@glimmer/env" "^0.1.7"
     "@glimmer/interfaces" "^0.39.1"
@@ -721,6 +721,7 @@
     "@glimmer/resolver" "^0.3.0"
     "@glimmer/runtime" "^0.39.1"
     "@glimmer/util" "^0.39.1"
+    "@simple-dom/interface" "^1.4.0"
 
 "@glimmer/application@^0.9.1":
   version "0.9.1"
@@ -739,10 +740,10 @@
     "@glimmer/runtime" "^0.31.0"
     "@glimmer/util" "^0.31.0"
 
-"@glimmer/blueprint@^0.14.0-alpha.2":
-  version "0.14.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@glimmer/blueprint/-/blueprint-0.14.0-alpha.2.tgz#120e3d6d6dd960416d3fb72441ea8897aeca264d"
-  integrity sha512-VXrZROkb2Xv/QpAeXS7bE6REflMHtcO6lx5CywlRSdNqcV1s410VJ8gpjVklIB0hxcF8rLwKlckEp+4spGHwGA==
+"@glimmer/blueprint@^0.14.0-alpha.3":
+  version "0.14.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/@glimmer/blueprint/-/blueprint-0.14.0-alpha.3.tgz#0b42057e8a43824effac4cc0f83644579af70ed2"
+  integrity sha512-lXnZTBBvmNYW8fwuX3kGfnuBVN5NQxtSgqpHoyxlOTv0f/Q2WgSkZRFGK6sEITicGXnRUWmZlqo5LBZk8cT5hg==
   dependencies:
     ember-cli-string-utils "^1.1.0"
 
@@ -812,16 +813,16 @@
     "@glimmer/wire-format" "^0.31.0"
     simple-html-tokenizer "^0.4.1"
 
-"@glimmer/component@^0.14.0-alpha.2":
-  version "0.14.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@glimmer/component/-/component-0.14.0-alpha.2.tgz#8a7110daac5e2911b69cc382c205131042b66a30"
-  integrity sha512-E1mNyKlQ3QsDghN8zlBrzNhsftRMZ6PpLUSToiU89VNO0YR0VSGo9ncd3pLuKrYYgLTK+mB6Bx08NwgQF+6Ccg==
+"@glimmer/component@^0.14.0-alpha.3":
+  version "0.14.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/@glimmer/component/-/component-0.14.0-alpha.3.tgz#bb91a1a6100b76b6ef4271c8144d7cdf0c7323eb"
+  integrity sha512-9s9DRTH8eJRSFFT7SuU47i5szRuzXkvLkSFDt9FYDGB3RmuEPcKhvsZ7/Qa9zYWkBglmlNEfgvv/icc4+GG4/Q==
   dependencies:
     "@glimmer/di" "^0.1.9"
     "@glimmer/env" "^0.1.7"
     "@glimmer/reference" "^0.39.1"
     "@glimmer/runtime" "^0.39.1"
-    "@glimmer/tracking" "^0.14.0-alpha.2"
+    "@glimmer/tracking" "^0.14.0-alpha.3"
     "@glimmer/util" "^0.39.1"
     broccoli-file-creator "^2.1.1"
     broccoli-merge-trees "^3.0.2"
@@ -1063,10 +1064,10 @@
     handlebars "^4.0.6"
     simple-html-tokenizer "^0.5.7"
 
-"@glimmer/tracking@^0.14.0-alpha.2":
-  version "0.14.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/@glimmer/tracking/-/tracking-0.14.0-alpha.2.tgz#cde33646de95f472e18736b70965536be2847cd9"
-  integrity sha512-Dqf2s8w9n5+92Xgnnkt/1Ox3GNWSPgPR2oFAFsODtW3VWv0Wd99KfVkjGmqMH895Tz6WmoSS4YjaxSEbErQaCQ==
+"@glimmer/tracking@^0.14.0-alpha.3":
+  version "0.14.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/@glimmer/tracking/-/tracking-0.14.0-alpha.3.tgz#d70e67c10194a9466f0b8e736ccbd4913f370750"
+  integrity sha512-v0AYXqjyZmDPqrx2Kx90BP6gS3Cobn2NblF/rvmX4puukn+mplpoZYrYbzqunaVIxapwSJn2P3aLz02Sw4stvg==
   dependencies:
     "@glimmer/di" "^0.1.9"
     "@glimmer/env" "^0.1.7"
@@ -1127,6 +1128,11 @@
   dependencies:
     "@glimmer/interfaces" "^0.39.2"
     "@glimmer/util" "^0.39.2"
+
+"@simple-dom/interface@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@simple-dom/interface/-/interface-1.4.0.tgz#e8feea579232017f89b0138e2726facda6fbb71f"
+  integrity sha512-l5qumKFWU0S+4ZzMaLXFU8tQZsicHEMEyAxI5kDFGhJsRqDwe0a7/iPA/GdxlGyDKseQQAgIz5kzU7eXTrlSpA==
 
 "@types/acorn@^4.0.3":
   version "4.0.5"
@@ -1670,6 +1676,11 @@ babel-plugin-external-helpers@^6.22.0:
   integrity sha1-IoX0iwK9Xe3oUXXK+MYuhq3M76E=
   dependencies:
     babel-runtime "^6.22.0"
+
+babel-plugin-glimmer-inline-precompile@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/babel-plugin-glimmer-inline-precompile/-/babel-plugin-glimmer-inline-precompile-1.2.0.tgz#02794b17aac6351da09596b54d9ec675428bba3e"
+  integrity sha512-Omp3RyJyN2An2htKiwo45eQvoqVZaOR5tSbN6PjBHaYfLxEXeOM6m8/3udvAQD/2XcjdLipemVKt+Xez3XwoZg==
 
 babel-plugin-module-resolver@^3.1.1:
   version "3.2.0"
