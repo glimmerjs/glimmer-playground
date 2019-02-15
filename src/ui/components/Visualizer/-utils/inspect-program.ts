@@ -64,7 +64,7 @@ function inspectOpcodes(artifacts: CompilerArtifacts) {
         case 1:
           val = opcode.op2;
           break;
-        case 3:
+        case 2:
           val = opcode.op3;
           break;
       }
