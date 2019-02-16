@@ -31,8 +31,8 @@ export default class extends Component {
   keepFocus = null;
   el = null;
 
-  constructor(options) {
-    super(options);
+  constructor(owner, args) {
+    super(owner, args);
     this.handleKeydown = handleKeydown.bind(this);
     this.keepFocus = keepFocus.bind(this);
   }
