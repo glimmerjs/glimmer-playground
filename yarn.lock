@@ -1437,7 +1437,7 @@ async-limiter@~1.0.0:
   resolved "https://registry.yarnpkg.com/async-limiter/-/async-limiter-1.0.0.tgz#78faed8c3d074ab81f22b4e985d79e8738f720f8"
   integrity sha512-jp/uFnooOiO+L211eZOoSyzpOITMXx1rBITauYykG3BRYPu8h0UcxsPNB04RR5vo4Tyz3+ay17tR6JVf9qzYWg==
 
-async-promise-queue@^1.0.3:
+async-promise-queue@^1.0.3, async-promise-queue@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/async-promise-queue/-/async-promise-queue-1.0.4.tgz#308baafbc74aff66a0bb6e7f4a18d4fe8434440c"
   integrity sha512-GQ5X3DT+TefYuFPHdvIPXFTlKnh39U7dwtl+aUBGeKjMea9nBpv3c91DXgeyBQmY07vQ97f3Sr9XHqkamEameQ==
@@ -2756,20 +2756,22 @@ broccoli-typescript-compiler@^2.2.0:
     typescript "~2.8.3"
     walk-sync "^0.3.2"
 
-broccoli-uglify-sourcemap@^1.0.0:
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/broccoli-uglify-sourcemap/-/broccoli-uglify-sourcemap-1.5.2.tgz#04f84ab0db539031fa868ccfa563c9932d50cedb"
-  integrity sha1-BPhKsNtTkDH6hozPpWPJky1Qzts=
+broccoli-uglify-sourcemap@^2.1.1:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/broccoli-uglify-sourcemap/-/broccoli-uglify-sourcemap-2.2.0.tgz#2ff49389bdf342a550c3596750ba2dde95a8f7d4"
+  integrity sha1-L/STib3zQqVQw1lnULot3pWo99Q=
   dependencies:
+    async-promise-queue "^1.0.4"
     broccoli-plugin "^1.2.1"
-    debug "^2.2.0"
-    lodash.merge "^4.5.1"
-    matcher-collection "^1.0.0"
+    debug "^3.1.0"
+    lodash.defaultsdeep "^4.6.0"
+    matcher-collection "^1.0.5"
     mkdirp "^0.5.0"
-    source-map-url "^0.3.0"
+    source-map-url "^0.4.0"
     symlink-or-copy "^1.0.1"
-    uglify-js "^2.7.0"
-    walk-sync "^0.1.3"
+    terser "^3.7.5"
+    walk-sync "^0.3.2"
+    workerpool "^2.3.0"
 
 broccoli-writer@~0.1.1:
   version "0.1.1"
@@ -3782,12 +3784,13 @@ ember-cli-typescript@^2.0.0-rc.1:
     stagehand "^1.0.0"
     walk-sync "^1.0.0"
 
-ember-cli-uglify@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/ember-cli-uglify/-/ember-cli-uglify-1.2.0.tgz#3208c32b54bc2783056e8bb0d5cfe9bbaf17ffb2"
-  integrity sha1-MgjDK1S8J4MFbouw1c/pu68X/7I=
+ember-cli-uglify@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/ember-cli-uglify/-/ember-cli-uglify-2.1.0.tgz#4a0641fe4768d7ab7d4807aca9924cc77c544184"
+  integrity sha512-lDzdAUfhGx5AMBsgyR54ibENVp/LRQuHNWNaP2SDjkAXDyuYFgW0iXIAfGbxF6+nYaesJ9Tr9AKOfTPlwxZDSg==
   dependencies:
-    broccoli-uglify-sourcemap "^1.0.0"
+    broccoli-uglify-sourcemap "^2.1.1"
+    lodash.defaultsdeep "^4.6.0"
 
 ember-cli-version-checker@^2.1.0, ember-cli-version-checker@^2.1.1, ember-cli-version-checker@^2.1.2:
   version "2.2.0"
@@ -6079,7 +6082,7 @@ lodash.keys@~2.3.0:
     lodash._shimkeys "~2.3.0"
     lodash.isobject "~2.3.0"
 
-lodash.merge@^4.3.0, lodash.merge@^4.5.1, lodash.merge@^4.6.0:
+lodash.merge@^4.3.0, lodash.merge@^4.6.0:
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/lodash.merge/-/lodash.merge-4.6.0.tgz#69884ba144ac33fe699737a6086deffadd0f89c5"
   integrity sha1-aYhLoUSsM/5plzemCG3v+t0PicU=
@@ -6293,7 +6296,7 @@ matcher-collection@^1.0.0, matcher-collection@^1.0.4:
   dependencies:
     minimatch "^3.0.2"
 
-matcher-collection@^1.1.1:
+matcher-collection@^1.0.5, matcher-collection@^1.1.1:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/matcher-collection/-/matcher-collection-1.1.2.tgz#1076f506f10ca85897b53d14ef54f90a5c426838"
   integrity sha512-YQ/teqaOIIfUHedRam08PB3NK7Mjct6BvzRnJmpGDm8uFXpNr1sbY4yuflI5JcEs6COpYA0FpRQhSDBf1tT95g==
@@ -8021,6 +8024,14 @@ source-map-support@^0.4.0, source-map-support@^0.4.15:
   dependencies:
     source-map "^0.5.6"
 
+source-map-support@~0.5.9:
+  version "0.5.10"
+  resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.10.tgz#2214080bc9d51832511ee2bab96e3c2f9353120c"
+  integrity sha512-YfQ3tQFTK/yzlGJuX8pTwa4tifQj4QS2Mj7UegOu8jAz59MqIiMGPXxQhVQiIMNzayuUSF/jEuVnfFF5JqybmQ==
+  dependencies:
+    buffer-from "^1.0.0"
+    source-map "^0.6.0"
+
 source-map-url@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/source-map-url/-/source-map-url-0.3.0.tgz#7ecaf13b57bcd09da8a40c5d269db33799d4aaf9"
@@ -8043,7 +8054,7 @@ source-map@^0.5.0, source-map@^0.5.6, source-map@~0.5.1:
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.5.7.tgz#8a039d2d1021d22d1ea14c80d8ea468ba2ef3fcc"
   integrity sha1-igOdLRAh0i0eoUyA2OpGi6LvP8w=
 
-source-map@^0.6.1, source-map@~0.6.1:
+source-map@^0.6.0, source-map@^0.6.1, source-map@~0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
   integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
@@ -8319,6 +8330,15 @@ temp@0.8.3:
     os-tmpdir "^1.0.0"
     rimraf "~2.2.6"
 
+terser@^3.7.5:
+  version "3.16.1"
+  resolved "https://registry.yarnpkg.com/terser/-/terser-3.16.1.tgz#5b0dd4fa1ffd0b0b43c2493b2c364fd179160493"
+  integrity sha512-JDJjgleBROeek2iBcSNzOHLKsB/MdDf+E/BOAJ0Tk9r7p9/fVobfv7LMJ/g/k3v9SXdmjZnIlFd5nfn/Rt0Xow==
+  dependencies:
+    commander "~2.17.1"
+    source-map "~0.6.1"
+    source-map-support "~0.5.9"
+
 testem@^2.9.2:
   version "2.14.0"
   resolved "https://registry.yarnpkg.com/testem/-/testem-2.14.0.tgz#418a9a15843f68381659c6a486abb4ea48d06c29"
@@ -8515,7 +8535,7 @@ uc.micro@^1.0.5:
   resolved "https://registry.yarnpkg.com/uc.micro/-/uc.micro-1.0.6.tgz#9c411a802a409a91fc6cf74081baba34b24499ac"
   integrity sha512-8Y75pvTYkLJW2hWQHXxoqRgV7qb9B+9vFEtidML+7koHUFapnVJAZ6cKs+Qjz5Aw3aZWHMC6u0wJE3At+nSGwA==
 
-uglify-js@^2.6, uglify-js@^2.7.0:
+uglify-js@^2.6:
   version "2.8.29"
   resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-2.8.29.tgz#29c5733148057bb4e1f75df35b7a9cb72e6a59dd"
   integrity sha1-KcVzMUgFe7Th913zW3qcty5qWd0=
@@ -8692,11 +8712,6 @@ vlq@^0.2.1:
   resolved "https://registry.yarnpkg.com/vlq/-/vlq-0.2.3.tgz#8f3e4328cf63b1540c0d67e1b2778386f8975b26"
   integrity sha512-DRibZL6DsNhIgYQ+wNdWDL2SL3bKPlVrRiBqV5yuMm++op8W4kGFtaQfCs4KEJn0wBZcHVHJ3eoywX8983k1ow==
 
-walk-sync@^0.1.3:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/walk-sync/-/walk-sync-0.1.3.tgz#8a07261a00bda6cfb1be25e9f100fad57546f583"
-  integrity sha1-igcmGgC9ps+xviXp8QD61XVG9YM=
-
 walk-sync@^0.2.7:
   version "0.2.7"
   resolved "https://registry.yarnpkg.com/walk-sync/-/walk-sync-0.2.7.tgz#b49be4ee6867657aeb736978b56a29d10fa39969"
@@ -8829,7 +8844,7 @@ workerpool@^2.2.1:
   dependencies:
     object-assign "4.1.1"
 
-workerpool@^2.3.1:
+workerpool@^2.3.0, workerpool@^2.3.1:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/workerpool/-/workerpool-2.3.3.tgz#49a70089bd55e890d68cc836a19419451d7c81d7"
   integrity sha512-L1ovlYHp6UObYqElXXpbd214GgbEKDED0d3sj7pRdFXjNkb2+un/AUcCkceHizO0IVI6SOGGncrcjozruCkRgA==
