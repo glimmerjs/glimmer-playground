@@ -7,8 +7,8 @@ export default class extends Component {
   @tracked tinyUrlCopied = false;
   @tracked tinyUrlFetching = false;
 
-  constructor(options) {
-    super(options);
+  constructor(owner, args) {
+    super(owner, args);
     this.fullUrl = window.location.href;
   }
 
