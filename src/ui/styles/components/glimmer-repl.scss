@@ -135,7 +135,7 @@ glimmer-repl {
 
   .add-implementation {
     margin-bottom: 12px;
-  
+
     .button {
       margin-left: 27px;
     }
@@ -145,10 +145,8 @@ glimmer-repl {
     position: fixed;
     right: 15px;
     bottom: 15px;
-    border: none;
     z-index: z('toggleVisualizer');
 
-    background: transparent;
     font-size: 18px;
 
     cursor: pointer;

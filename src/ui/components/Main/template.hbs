@@ -99,7 +99,13 @@
       <Visualizer @fs={{fs}} />
     {{/if}}
 
-    <button class="toggle-visualizer" onclick={{action toggleVisualizer}}>π</button>
+    <button class="toggle-visualizer" onclick={{action toggleVisualizer}}>
+      {{#if this.isVisualizerShowing}}
+        Hide bytecode
+      {{else}}
+        Show bytecode
+      {{/if}}
+    </button>
   {{else}}
     <div class="pane editor">
       <div class="loading">
